@@ -1,10 +1,10 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { GameState } from '@/hooks/useGameEngine';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Check, SkipForward, Eye } from 'lucide-react';
 import CategoryIcon from '../icons/CategoryIcon';
 import { useSound } from '@/hooks/useSound';
@@ -17,10 +17,16 @@ type PlayingScreenProps = {
 const WordDisplay = ({ word, revealed, onReveal }: { word: string; revealed: boolean; onReveal: () => void; }) => {
     if (!revealed) {
         return (
-            <div className="text-center space-y-4">
-                <p className="text-muted-foreground">Are you the drawer?</p>
-                <Button onClick={onReveal} size="lg">
-                    <Eye className="mr-2 h-5 w-5" /> Show Word
+            <div className="text-center space-y-6 p-4">
+                <div className="flex flex-col items-center gap-4">
+                    <Eye className="h-16 w-16 text-primary" />
+                    <h2 className="text-3xl font-bold">Are you the drawer?</h2>
+                    <p className="text-muted-foreground max-w-xs text-center">
+                        The word is hidden. Click the button below to reveal it. Make sure your team can't see the screen!
+                    </p>
+                </div>
+                <Button onClick={onReveal} size="lg" className="w-full text-lg h-14">
+                    <Eye className="mr-2 h-6 w-6" /> Reveal Word
                 </Button>
             </div>
         )
@@ -83,7 +89,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
     dispatch({type: 'REVEAL_WORD'});
   }
 
-  const progressValue = (timeLeft / settings.roundTime) * 100;
+  const progressAngle = (timeLeft / settings.roundTime) * 360;
 
   return (
     <div className="flex flex-col h-full items-center justify-between space-y-8">
@@ -106,14 +112,18 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
 
     { currentRound.wordRevealed && 
       <div className="w-full space-y-6 animate-in fade-in duration-500">
-        <div className="space-y-2">
-            <div className="relative w-full h-4 rounded-full overflow-hidden bg-muted">
-                <Progress 
-                    value={progressValue} 
-                    className={`h-4 transition-all duration-1000 linear ${timeLeft <= 10 ? 'bg-destructive' : 'bg-primary'}`}
-                />
+        <div className="flex justify-center items-center">
+            <div
+                className="relative h-40 w-40 rounded-full flex items-center justify-center transition-all duration-1000"
+                style={{
+                    background: `
+                        radial-gradient(closest-side, hsl(var(--card)) 79%, transparent 80% 100%),
+                        conic-gradient(${timeLeft <= 10 ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'} ${progressAngle}deg, hsl(var(--muted)) 0)
+                    `,
+                }}
+            >
+                <p className="text-center text-5xl font-mono font-bold">{timeLeft}</p>
             </div>
-            <p className="text-center text-2xl font-mono font-bold">{timeLeft}s</p>
         </div>
         
         <div className="grid grid-cols-2 gap-4">
@@ -135,3 +145,5 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
     </div>
   );
 }
+
+  
