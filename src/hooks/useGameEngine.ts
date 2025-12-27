@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducer, useEffect, useCallback } from 'react';
-import { getNewWord } from '@/lib/words';
+import { getNewWord, type SelectedCategories } from '@/lib/words';
 
 export interface Team {
   id: number;
@@ -13,7 +13,7 @@ export interface GameSettings {
   roundTime: number;
   skipLimit: number;
   winningScore: number;
-  categories: string[];
+  categories: SelectedCategories;
 }
 
 export interface GameState {
@@ -31,11 +31,10 @@ export interface GameState {
   };
   roundWinner: Team | null;
   usedWords: string[];
-  customWords: string[];
 }
 
 type GameAction =
-  | { type: 'START_GAME'; teams: string[]; settings: GameSettings, customWords: string[] }
+  | { type: 'START_GAME'; teams: string[]; settings: GameSettings }
   | { type: 'START_ROUND' }
   | { type: 'REVEAL_WORD' }
   | { type: 'CORRECT_GUESS' }
@@ -53,7 +52,7 @@ const initialState: GameState = {
     roundTime: 60,
     skipLimit: 3,
     winningScore: 50,
-    categories: [],
+    categories: {},
   },
   currentTurn: {
     teamIndex: 0,
@@ -66,16 +65,7 @@ const initialState: GameState = {
   },
   roundWinner: null,
   usedWords: [],
-  customWords: [],
 };
-
-function getCustomWord(customWords: string[], usedWords: string[]): { word: string; category: string } | null {
-    const availableWords = customWords.filter(word => !usedWords.includes(word));
-    if (availableWords.length === 0) return null;
-    const word = availableWords[Math.floor(Math.random() * availableWords.length)];
-    return { word, category: 'Custom' };
-}
-
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -83,13 +73,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return action.state;
 
     case 'START_GAME': {
-      const { teams, settings, customWords } = action;
-      const newWordData = customWords.length > 0 
-        ? getCustomWord(customWords, []) 
-        : getNewWord([], settings.categories);
+      const { teams, settings } = action;
+      const newWordData = getNewWord([], settings.categories);
         
       if (!newWordData) {
-        // This should not happen if categories are selected or custom words are provided
+        // This should not happen if categories are selected
         return state;
       }
 
@@ -98,7 +86,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         status: 'turn_start',
         teams: teams.map((name, i) => ({ id: i, name, score: 0 })),
         settings,
-        customWords,
         currentRound: {
             ...initialState.currentRound,
             word: newWordData.word,
@@ -144,9 +131,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'SKIP_WORD': {
       if (state.currentRound.skipsUsed >= state.settings.skipLimit) return state;
       
-      const newWordData = state.customWords.length > 0
-        ? getCustomWord(state.customWords, state.usedWords)
-        : getNewWord(state.usedWords, state.settings.categories);
+      const newWordData = getNewWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
         // No more words available
@@ -176,9 +161,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'ADVANCE_TURN': {
       const nextTeamIndex = (state.currentTurn.teamIndex + 1) % state.teams.length;
-      const newWordData = state.customWords.length > 0
-        ? getCustomWord(state.customWords, state.usedWords)
-        : getNewWord(state.usedWords, state.settings.categories);
+      const newWordData = getNewWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
         return { ...state, status: 'game_over' };
@@ -225,7 +208,11 @@ export function useGameEngine() {
     try {
       const savedState = localStorage.getItem(STORAGE_KEY);
       if (savedState) {
-        dispatch({ type: 'LOAD_STATE', state: JSON.parse(savedState) });
+        const parsed = JSON.parse(savedState);
+        // Basic validation to prevent loading corrupted state
+        if (parsed.status && parsed.teams) {
+            dispatch({ type: 'LOAD_STATE', state: parsed });
+        }
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);

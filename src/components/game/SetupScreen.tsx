@@ -11,12 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CATEGORIES } from '@/lib/words';
-import { Checkbox } from '../ui/checkbox';
-import { Textarea } from '../ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { X, Plus, Gamepad2, Settings } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
+import { X, Plus, Gamepad2, Settings, BookOpen } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import CategorySelectionScreen from './CategorySelectionScreen';
+import type { SelectedCategories } from '@/lib/words';
+
 
 type SetupScreenProps = {
   dispatch: React.Dispatch<any>;
@@ -27,8 +27,10 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
   const [roundTime, setRoundTime] = useState<number>(60);
   const [skipLimit, setSkipLimit] = useState<number>(3);
   const [winningScore, setWinningScore] = useState<number>(50);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(CATEGORIES);
-  const [customWords, setCustomWords] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>({
+    'General': { difficulty: 'Beginner', subcategories: ['Objects', 'Actions'] },
+  });
+  const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleAddTeam = () => {
@@ -60,42 +62,25 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
     newTeams[index] = name;
     setTeams(newTeams);
   };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
-  };
-
+  
   const handleStartGame = () => {
-    const parsedCustomWords = customWords.split('\n').map(w => w.trim()).filter(Boolean);
-    if (parsedCustomWords.length === 0 && selectedCategories.length === 0) {
+    if (Object.keys(selectedCategories).length === 0) {
       toast({
         title: 'No Words to Play With',
-        description: 'Please select at least one category or add custom words.',
+        description: 'Please select at least one word category.',
         variant: 'destructive',
       });
       return;
-    }
-
-    if (parsedCustomWords.length > 0 && parsedCustomWords.length < teams.length * 2) {
-        toast({
-            title: 'Not Enough Custom Words',
-            description: `Please add at least ${teams.length * 2} custom words for a good game.`,
-            variant: 'destructive',
-          });
-          return;
     }
 
     dispatch({
       type: 'START_GAME',
       teams: teams.map(t => t.trim()).filter(Boolean),
       settings: { roundTime, skipLimit, winningScore, categories: selectedCategories },
-      customWords: parsedCustomWords,
     });
   };
+
+  const selectedCategoryCount = Object.values(selectedCategories).reduce((acc, cat) => acc + cat.subcategories.length, 0);
 
   return (
     <div className="space-y-6">
@@ -166,35 +151,33 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
           </div>
         </div>
       </div>
-
-      <div className="space-y-4">
-          <Label className="text-lg font-semibold">Word Categories</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {CATEGORIES.map(category => (
-                  <div key={category} className="flex items-center space-x-2">
-                      <Checkbox 
-                          id={category} 
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={() => handleCategoryChange(category)}
-                      />
-                      <label htmlFor={category} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          {category}
-                      </label>
-                  </div>
-              ))}
-          </div>
-      </div>
       
       <div className="space-y-2">
-          <Label htmlFor="custom-words" className="text-lg font-semibold">Or Add Custom Words</Label>
-          <Textarea 
-              id="custom-words"
-              placeholder="Add your own words, one per line..."
-              value={customWords}
-              onChange={e => setCustomWords(e.target.value)}
-              className="min-h-[100px]"
-          />
-          <p className="text-xs text-muted-foreground">If you add custom words, the selected categories will be ignored.</p>
+        <Label className="text-lg font-semibold">Word Categories</Label>
+        <Dialog open={isCategoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    <span>
+                        {selectedCategoryCount > 0 ? `${selectedCategoryCount} categories selected` : 'Select categories'}
+                    </span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+                <DialogHeader>
+                    <DialogTitle>Select Word Categories</DialogTitle>
+                </DialogHeader>
+                <div className="flex-grow overflow-y-auto -mx-6 px-6">
+                    <CategorySelectionScreen 
+                        initialSelection={selectedCategories}
+                        onSave={(newSelection) => {
+                            setSelectedCategories(newSelection);
+                            setCategoryDialogOpen(false);
+                        }}
+                    />
+                </div>
+            </DialogContent>
+        </Dialog>
       </div>
 
       <Button onClick={handleStartGame} size="lg" className="w-full text-lg bg-accent hover:bg-accent/90">

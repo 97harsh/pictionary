@@ -1,4 +1,4 @@
-import { PawPrint, Lamp, PersonStanding, Film, MapPin, Grape, HelpCircle } from 'lucide-react';
+import { PawPrint, Lamp, PersonStanding, Film, MapPin, Grape, HelpCircle, FlaskConical, Atom, Microscope, Popcorn } from 'lucide-react';
 
 type CategoryIconProps = {
     category: string;
@@ -12,6 +12,11 @@ const iconMap: Record<string, React.ElementType> = {
     'Movies': Film,
     'Places': MapPin,
     'Food': Grape,
+    'General': HelpCircle,
+    'Biology': Microscope,
+    'Chemistry': FlaskConical,
+    'Physics': Atom,
+    'Movies by Generation': Popcorn,
     'Custom': HelpCircle
 };
 
