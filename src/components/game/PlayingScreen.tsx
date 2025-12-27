@@ -58,7 +58,7 @@ const WordDisplay = ({ word, revealed, hidden, onReveal, onHide, onShow }: { wor
 
 export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProps) {
   const { play: playTick, stop: stopTick } = useSound('/sounds/tick.mp3', { volume: -10, loop: true });
-  const { play: playEnd } = useSound('/sounds/buzzer.mp3', { volume: 0 });
+  const { play: playEnd } = useSound('/sounds/ding.mp3', { volume: 0 });
   const { play: playCorrect } = useSound('/sounds/correct.mp3', { volume: -5 });
 
   const { settings, currentTurn, currentRound } = gameState;
@@ -80,7 +80,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
           playEnd();
           return 0;
         }
-        if (prev <= 11 && prev > 1) { // only play tick sound for last 10 seconds
+        if (prev <= 11 && prev > 1) { 
             playTick();
         }
         return prev - 1;
