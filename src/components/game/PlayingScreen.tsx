@@ -94,6 +94,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
   }, [dispatch, settings.roundTime, currentRound.wordRevealed, playEnd, playTick, stopTick]);
 
   const handleCorrectGuess = () => {
+    stopTick();
     playCorrect();
     dispatch({ type: 'CORRECT_GUESS' });
   };
