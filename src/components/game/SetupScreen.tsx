@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -25,6 +26,7 @@ type SetupScreenProps = {
 export default function SetupScreen({ dispatch }: SetupScreenProps) {
   const [teams, setTeams] = useState<string[]>(['Team 1', 'Team 2']);
   const [roundTime, setRoundTime] = useState<number>(60);
+  const [isCustomTime, setIsCustomTime] = useState(false);
   const [skipLimit, setSkipLimit] = useState<number>(3);
   const [winningScore, setWinningScore] = useState<number>(50);
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>({
@@ -62,9 +64,18 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
     newTeams[index] = name;
     setTeams(newTeams);
   };
+
+  const handleRoundTimeChange = (value: string) => {
+    if (value === 'custom') {
+      setIsCustomTime(true);
+    } else {
+      setIsCustomTime(false);
+      setRoundTime(Number(value));
+    }
+  }
   
   const handleStartGame = () => {
-    const totalSelected = Object.values(selectedCategories).reduce((acc, val) => acc + val.subcategories.length, 0);
+    const totalSelected = Object.values(selectedCategories).reduce((acc, val) => acc + (val.subcategories?.length || 0), 0);
     if (totalSelected === 0) {
       toast({
         title: 'No Words to Play With',
@@ -72,6 +83,15 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
         variant: 'destructive',
       });
       return;
+    }
+    
+    if (isCustomTime && (roundTime <= 0 || isNaN(roundTime))) {
+        toast({
+            title: 'Invalid Custom Time',
+            description: 'Please enter a valid number of seconds for the round time.',
+            variant: 'destructive'
+        });
+        return;
     }
 
     dispatch({
@@ -118,14 +138,24 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="round-time">Round Time</Label>
-            <Select onValueChange={value => setRoundTime(Number(value))} defaultValue={String(roundTime)}>
+            <Select onValueChange={handleRoundTimeChange} defaultValue={String(roundTime)}>
               <SelectTrigger id="round-time"><SelectValue placeholder="Select time" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="30">30 seconds</SelectItem>
                 <SelectItem value="60">60 seconds</SelectItem>
                 <SelectItem value="90">90 seconds</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
               </SelectContent>
             </Select>
+            {isCustomTime && (
+                <Input 
+                    type="number"
+                    placeholder="Seconds"
+                    value={roundTime}
+                    onChange={(e) => setRoundTime(Number(e.target.value))}
+                    className="mt-2"
+                />
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="skip-limit">Skips per Round</Label>
