@@ -14,7 +14,7 @@ type PlayingScreenProps = {
   dispatch: React.Dispatch<any>;
 };
 
-const WordDisplay = ({ word, revealed, onReveal, onHide }: { word: string; revealed: boolean; onReveal: () => void; onHide: () => void; }) => {
+const WordDisplay = ({ word, revealed, hidden, onReveal, onHide, onShow }: { word: string; revealed: boolean; hidden: boolean; onReveal: () => void; onHide: () => void; onShow: () => void; }) => {
     if (!revealed) {
         return (
             <div className="text-center space-y-6 p-4">
@@ -27,6 +27,16 @@ const WordDisplay = ({ word, revealed, onReveal, onHide }: { word: string; revea
                 </div>
                 <Button onClick={onReveal} size="lg" className="w-full text-lg h-14">
                     <Eye className="mr-2 h-6 w-6" /> Reveal Word
+                </Button>
+            </div>
+        )
+    }
+
+    if (hidden) {
+        return (
+             <div className="text-center w-full animate-in fade-in duration-300">
+                <Button onClick={onShow} size="lg" className="w-full text-lg h-14">
+                    <Eye className="mr-2 h-6 w-6" /> Show Word
                 </Button>
             </div>
         )
@@ -99,8 +109,6 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
 
   const progressAngle = (timeLeft / settings.roundTime) * 360;
 
-  const isWordVisible = currentRound.wordRevealed && !wordHidden;
-
   return (
     <div className="flex flex-col h-full items-center justify-between space-y-8">
       <div className="w-full text-center">
@@ -116,7 +124,14 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
             </div>
         </CardHeader>
         <CardContent className="flex-grow flex items-center justify-center w-full">
-            <WordDisplay word={currentRound.word} revealed={isWordVisible} onReveal={handleRevealWord} onHide={() => setWordHidden(true)} />
+            <WordDisplay 
+              word={currentRound.word} 
+              revealed={currentRound.wordRevealed} 
+              hidden={wordHidden}
+              onReveal={handleRevealWord} 
+              onHide={() => setWordHidden(true)}
+              onShow={() => setWordHidden(false)}
+            />
         </CardContent>
       </Card>
 
