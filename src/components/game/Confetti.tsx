@@ -1,23 +1,25 @@
+
 "use client";
 
 import React, { useEffect, useCallback } from 'react';
 
 const Confetti: React.FC = () => {
-  const fire = useCallback(async () => {
-    const { default: confetti, type Options } = await import('canvas-confetti');
-    
-    const options: Options = {
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 }
-    };
-    
-    confetti(options);
-  }, []);
-
   useEffect(() => {
+    const fire = async () => {
+      const canvasConfetti = await import('canvas-confetti');
+      const confetti = canvasConfetti.default;
+      
+      const options: canvasConfetti.Options = {
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+      };
+      
+      confetti(options);
+    };
+
     fire();
-  }, [fire]);
+  }, []);
 
   return null;
 };
