@@ -5,6 +5,7 @@ import React from 'react';
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import Scoreboard from "./Scoreboard";
+import EndGameButton from "./EndGameButton";
 
 type TurnStartScreenProps = {
     gameState: GameState;
@@ -33,6 +34,10 @@ export default function TurnStartScreen({ gameState, dispatch }: TurnStartScreen
             
             <div className="pt-4">
                 <Scoreboard teams={gameState.teams} currentTeamId={currentTeam.id} />
+            </div>
+
+            <div className="!mt-8">
+                <EndGameButton dispatch={dispatch} />
             </div>
         </div>
     )

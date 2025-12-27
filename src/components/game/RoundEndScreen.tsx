@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import Scoreboard from "./Scoreboard";
 import Confetti from "./Confetti";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import EndGameButton from "./EndGameButton";
 
 type RoundEndScreenProps = {
     gameState: GameState;
@@ -57,6 +58,10 @@ export default function RoundEndScreen({ gameState, dispatch }: RoundEndScreenPr
             <Button onClick={handleNextTurn} size="lg" className="w-full text-lg">
                 Next Turn: {nextTeam.name} <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
+            
+            <div className="!mt-8">
+                <EndGameButton dispatch={dispatch} />
+            </div>
         </div>
     )
 }

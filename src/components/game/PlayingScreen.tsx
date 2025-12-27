@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/
 import { Check, SkipForward, Eye, EyeOff } from 'lucide-react';
 import CategoryIcon from '../icons/CategoryIcon';
 import { useSound } from '@/hooks/useSound';
+import EndGameButton from './EndGameButton';
 
 type PlayingScreenProps = {
   gameState: GameState;
@@ -110,7 +111,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
   const progressAngle = (timeLeft / settings.roundTime) * 360;
 
   return (
-    <div className="flex flex-col h-full items-center justify-between space-y-8">
+    <div className="flex flex-col h-full items-center justify-between space-y-4">
       <div className="w-full text-center">
         <p className="text-lg text-primary">{currentTeam.name}'s Turn</p>
         <p className="text-2xl font-bold">{currentTeam.score} points</p>
@@ -167,6 +168,9 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
         </div>
       </div>
       }
+      <div className="w-full pt-4">
+        <EndGameButton dispatch={dispatch} />
+      </div>
     </div>
   );
 }

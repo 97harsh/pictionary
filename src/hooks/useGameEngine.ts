@@ -43,6 +43,7 @@ type GameAction =
   | { type: 'TIME_UP' }
   | { type: 'RESET_GAME' }
   | { type: 'ADVANCE_TURN' }
+  | { type: 'FORCE_GAME_OVER' }
   | { type: 'LOAD_STATE'; state: GameState };
 
 const initialState: GameState = {
@@ -198,6 +199,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         },
         usedWords: [...state.usedWords, newWordData.word],
       };
+    }
+
+    case 'FORCE_GAME_OVER': {
+        return {
+            ...state,
+            status: 'game_over',
+        }
     }
 
     case 'RESET_GAME':
