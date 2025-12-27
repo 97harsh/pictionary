@@ -34,7 +34,7 @@ const WordDisplay = ({ word, revealed, hidden, onReveal, onHide, onShow }: { wor
 
     if (hidden) {
         return (
-             <div className="text-center w-full animate-in fade-in duration-300">
+             <div className="text-center w-full flex items-center justify-center animate-in fade-in duration-300">
                 <Button onClick={onShow} size="lg" className="w-full text-lg h-14">
                     <Eye className="mr-2 h-6 w-6" /> Show Word
                 </Button>
@@ -79,7 +79,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
           playEnd();
           return 0;
         }
-        if (prev <= 11) {
+        if (prev <= 11 && prev > 1) { // only play tick sound for last 10 seconds
             playTick();
         }
         return prev - 1;

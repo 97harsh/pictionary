@@ -12,6 +12,9 @@ export function useSound(url: string, { volume = 0, loop = false }: UseSoundOpti
   const playerRef = useRef<Tone.Player | null>(null);
 
   useEffect(() => {
+    // Ensure this runs only in the browser
+    if (typeof window === 'undefined') return;
+
     const player = new Tone.Player({
       url,
       loop,
@@ -26,18 +29,28 @@ export function useSound(url: string, { volume = 0, loop = false }: UseSoundOpti
     playerRef.current = player;
 
     return () => {
-      player.dispose();
+      player?.dispose();
     };
   }, [url, volume, loop]);
 
   const play = useCallback(async () => {
-    await Tone.start();
-    if (playerRef.current?.state !== 'started') {
-        playerRef.current?.start();
+    // Ensure this runs only in the browser
+    if (typeof window === 'undefined') return;
+
+    try {
+      await Tone.start();
+      if (playerRef.current?.state !== 'started') {
+          playerRef.current?.start();
+      }
+    } catch (e) {
+      console.error("Error starting Tone.js", e);
     }
   }, []);
 
   const stop = useCallback(() => {
+    // Ensure this runs only in the browser
+    if (typeof window === 'undefined') return;
+    
     if (playerRef.current?.state === 'started') {
       playerRef.current?.stop();
     }
