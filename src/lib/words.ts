@@ -20,7 +20,7 @@ export const WORDS: WordStructure = {
         },
         "Actions": {
             "Beginner": ["Running", "Jumping", "Swimming", "Dancing", "Singing", "Eating", "Sleeping", "Reading", "Writing", "Painting"],
-            "Advanced": ["Juggling", "Summersault", "Kneading", "Whittling", "Origami", "Calligraphy", "Beatboxing", "Yodeling", "Auctioneering", "Voguing"]
+            "Advanced": ["Juggling", "Somersault", "Kneading", "Whittling", "Origami", "Calligraphy", "Beatboxing", "Yodeling", "Auctioneering", "Voguing"]
         },
         "Places": {
             "Beginner": ["Beach", "Mountain", "City", "Forest", "Desert", "School", "Library", "Hospital", "Restaurant", "Airport"],
@@ -74,8 +74,8 @@ export type SelectedCategories = {
     };
 };
 
-export function getNewWord(usedWords: string[], selection: SelectedCategories): { word: string, category: string } | null {
-    const availableWords: { word: string, category: string }[] = [];
+export function getNewWord(usedWords: string[], selection: SelectedCategories): { word: string, category: string, subCategory: string } | null {
+    const availableWords: { word: string, category: string, subCategory: string }[] = [];
 
     for (const mainCategory in selection) {
         if (WORDS[mainCategory]) {
@@ -85,7 +85,7 @@ export function getNewWord(usedWords: string[], selection: SelectedCategories): 
                     const words = WORDS[mainCategory][sub][difficulty];
                     for (const word of words) {
                         if (!usedWords.includes(word)) {
-                            availableWords.push({ word, category: sub });
+                            availableWords.push({ word, category: mainCategory, subCategory: sub });
                         }
                     }
                 }

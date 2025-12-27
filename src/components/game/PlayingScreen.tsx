@@ -121,7 +121,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
         <CardHeader className="items-center text-center p-2">
             <div className="flex items-center gap-2 text-muted-foreground">
                 <CategoryIcon category={currentRound.category} />
-                <CardDescription className="text-lg">{currentRound.category}</CardDescription>
+                <CardDescription className="text-lg">{currentRound.subCategory}</CardDescription>
             </div>
         </CardHeader>
         <CardContent className="flex-grow flex items-center justify-center w-full">

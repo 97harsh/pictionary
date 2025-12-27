@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -31,13 +32,21 @@ export default function CategorySelectionScreen({ initialSelection, onSave }: Ca
 
   const handleDifficultyChange = (mainCategory: string, difficulty: Difficulty) => {
     if (!difficulty) return;
-    setSelection(prev => ({
-      ...prev,
-      [mainCategory]: {
-        ...prev[mainCategory],
-        difficulty,
-      },
-    }));
+    setSelection(prev => {
+        const newSelection = { ...prev };
+        if (newSelection[mainCategory]) {
+            newSelection[mainCategory] = {
+                ...newSelection[mainCategory],
+                difficulty,
+            };
+        } else {
+             newSelection[mainCategory] = {
+                difficulty,
+                subcategories: [],
+            };
+        }
+        return newSelection;
+    });
   };
 
   const handleSubcategoryChange = (mainCategory: string, subcategory: string) => {
@@ -52,7 +61,7 @@ export default function CategorySelectionScreen({ initialSelection, onSave }: Ca
         ? subcategories.filter(sc => sc !== subcategory)
         : [...subcategories, subcategory];
       
-      if (newSubcategories.length === 0) {
+      if (newSubcategories.length === 0 && !mainCatSelection.difficulty) {
         delete newSelection[mainCategory];
       } else {
         newSelection[mainCategory] = { ...mainCatSelection, subcategories: newSubcategories };
@@ -63,7 +72,7 @@ export default function CategorySelectionScreen({ initialSelection, onSave }: Ca
   };
 
   const handleSave = () => {
-    const totalSelected = Object.values(selection).reduce((acc, val) => acc + val.subcategories.length, 0);
+    const totalSelected = Object.values(selection).reduce((acc, val) => acc + (val.subcategories?.length || 0), 0);
     if (totalSelected === 0) {
         toast({
             title: "No Categories Selected",
@@ -72,7 +81,13 @@ export default function CategorySelectionScreen({ initialSelection, onSave }: Ca
         })
         return;
     }
-    onSave(selection);
+    const cleanedSelection = Object.entries(selection).reduce((acc, [key, value]) => {
+        if(value.subcategories && value.subcategories.length > 0) {
+            acc[key] = value;
+        }
+        return acc;
+    }, {} as SelectedCategories)
+    onSave(cleanedSelection);
   };
   
   return (

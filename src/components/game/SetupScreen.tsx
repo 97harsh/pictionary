@@ -64,10 +64,11 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
   };
   
   const handleStartGame = () => {
-    if (Object.keys(selectedCategories).length === 0) {
+    const totalSelected = Object.values(selectedCategories).reduce((acc, val) => acc + val.subcategories.length, 0);
+    if (totalSelected === 0) {
       toast({
         title: 'No Words to Play With',
-        description: 'Please select at least one word category.',
+        description: 'Please select at least one word subcategory.',
         variant: 'destructive',
       });
       return;
@@ -80,7 +81,7 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
     });
   };
 
-  const selectedCategoryCount = Object.values(selectedCategories).reduce((acc, cat) => acc + cat.subcategories.length, 0);
+  const selectedSubcategoryCount = Object.values(selectedCategories).reduce((acc, cat) => acc + (cat.subcategories?.length || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -159,7 +160,7 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <BookOpen className="mr-2 h-4 w-4" />
                     <span>
-                        {selectedCategoryCount > 0 ? `${selectedCategoryCount} categories selected` : 'Select categories'}
+                        {selectedSubcategoryCount > 0 ? `${selectedSubcategoryCount} subcategories selected` : 'Select categories'}
                     </span>
                 </Button>
             </DialogTrigger>

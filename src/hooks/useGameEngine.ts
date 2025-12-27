@@ -26,6 +26,7 @@ export interface GameState {
   currentRound: {
     word: string;
     category: string;
+    subCategory: string;
     skipsUsed: number;
     wordRevealed: boolean;
   };
@@ -60,6 +61,7 @@ const initialState: GameState = {
   currentRound: {
     word: '',
     category: '',
+    subCategory: '',
     skipsUsed: 0,
     wordRevealed: false,
   },
@@ -90,6 +92,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             ...initialState.currentRound,
             word: newWordData.word,
             category: newWordData.category,
+            subCategory: newWordData.subCategory,
         },
         usedWords: [newWordData.word],
       };
@@ -144,6 +147,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           ...state.currentRound,
           word: newWordData.word,
           category: newWordData.category,
+          subCategory: newWordData.subCategory,
           skipsUsed: state.currentRound.skipsUsed + 1,
           wordRevealed: true, // Auto-reveal on skip
         },
@@ -177,6 +181,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         currentRound: {
             word: newWordData.word,
             category: newWordData.category,
+            subCategory: newWordData.subCategory,
             skipsUsed: 0,
             wordRevealed: false,
         },
