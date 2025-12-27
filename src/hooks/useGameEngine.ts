@@ -159,7 +159,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           word: newWordData.word,
           category: newWordData.category,
           skipsUsed: state.currentRound.skipsUsed + 1,
-          wordRevealed: false,
+          wordRevealed: true, // Auto-reveal on skip
         },
         usedWords: [...state.usedWords, newWordData.word],
       };

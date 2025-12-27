@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { GameState } from '@/hooks/useGameEngine';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
-import { Check, SkipForward, Eye } from 'lucide-react';
+import { Check, SkipForward, Eye, EyeOff } from 'lucide-react';
 import CategoryIcon from '../icons/CategoryIcon';
 import { useSound } from '@/hooks/useSound';
 
@@ -14,7 +14,7 @@ type PlayingScreenProps = {
   dispatch: React.Dispatch<any>;
 };
 
-const WordDisplay = ({ word, revealed, onReveal }: { word: string; revealed: boolean; onReveal: () => void; }) => {
+const WordDisplay = ({ word, revealed, onReveal, onHide }: { word: string; revealed: boolean; onReveal: () => void; onHide: () => void; }) => {
     if (!revealed) {
         return (
             <div className="text-center space-y-6 p-4">
@@ -33,9 +33,14 @@ const WordDisplay = ({ word, revealed, onReveal }: { word: string; revealed: boo
     }
 
     return (
-        <h2 className="text-5xl md:text-6xl font-bold tracking-wider text-center break-words animate-in fade-in duration-500">
-            {word}
-        </h2>
+        <div className="text-center w-full animate-in fade-in duration-500">
+            <h2 className="text-5xl md:text-6xl font-bold tracking-wider text-center break-words">
+                {word}
+            </h2>
+            <Button onClick={onHide} variant="ghost" size="sm" className="mt-4 text-muted-foreground">
+                <EyeOff className="mr-2 h-4 w-4" /> Hide Word
+            </Button>
+        </div>
     );
 };
 
@@ -47,6 +52,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
 
   const { settings, currentTurn, currentRound } = gameState;
   const [timeLeft, setTimeLeft] = useState(settings.roundTime);
+  const [wordHidden, setWordHidden] = useState(false);
   
   const currentTeam = useMemo(() => gameState.teams[currentTurn.teamIndex], [gameState.teams, currentTurn.teamIndex]);
 
@@ -83,13 +89,17 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
   
   const handleSkipWord = () => {
     dispatch({ type: 'SKIP_WORD' });
+    setWordHidden(false);
   };
 
   const handleRevealWord = () => {
     dispatch({type: 'REVEAL_WORD'});
+    setWordHidden(false);
   }
 
   const progressAngle = (timeLeft / settings.roundTime) * 360;
+
+  const isWordVisible = currentRound.wordRevealed && !wordHidden;
 
   return (
     <div className="flex flex-col h-full items-center justify-between space-y-8">
@@ -106,7 +116,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
             </div>
         </CardHeader>
         <CardContent className="flex-grow flex items-center justify-center w-full">
-            <WordDisplay word={currentRound.word} revealed={currentRound.wordRevealed} onReveal={handleRevealWord} />
+            <WordDisplay word={currentRound.word} revealed={isWordVisible} onReveal={handleRevealWord} onHide={() => setWordHidden(true)} />
         </CardContent>
       </Card>
 
@@ -145,5 +155,3 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
     </div>
   );
 }
-
-  
