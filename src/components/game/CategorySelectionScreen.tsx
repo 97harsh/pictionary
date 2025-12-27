@@ -7,13 +7,6 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import CategoryIcon from '../icons/CategoryIcon';
 import { CheckCircle2 } from 'lucide-react';
@@ -92,13 +85,7 @@ export default function CategorySelectionScreen({ initialSelection, onSave }: Ca
   
   return (
     <div className="space-y-6 h-full flex flex-col">
-      <Carousel
-        opts={{
-          align: 'start',
-        }}
-        className="w-full"
-      >
-        <CarouselContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {mainCategories.map(mainCategory => {
             const subcategories = Object.keys(WORDS[mainCategory]);
             const currentSelection = selection[mainCategory];
@@ -106,73 +93,68 @@ export default function CategorySelectionScreen({ initialSelection, onSave }: Ca
             const selectedSubcategories = currentSelection?.subcategories || [];
 
             return (
-              <CarouselItem key={mainCategory} className="md:basis-1/2 lg:basis-1/3">
-                <div className="p-1">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-xl font-medium flex items-center gap-2">
-                         <CategoryIcon category={mainCategory} /> {mainCategory}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div>
-                          <Label className="text-sm font-medium">Difficulty</Label>
-                          <ToggleGroup
-                            type="single"
-                            defaultValue="Beginner"
-                            value={currentDifficulty}
-                            onValueChange={(value: Difficulty) => handleDifficultyChange(mainCategory, value)}
-                            className="grid grid-cols-2 mt-1"
-                          >
-                            <ToggleGroupItem value="Beginner" aria-label="Toggle Beginner">
-                              Beginner
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="Advanced" aria-label="Toggle Advanced">
-                              Advanced
-                            </ToggleGroupItem>
-                          </ToggleGroup>
-                        </div>
-                        
-                        <div className="space-y-2">
-                           <Label className="text-sm font-medium">Subcategories</Label>
-                           <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                            {subcategories.map(sub => (
-                                <div 
-                                    key={sub}
-                                    onClick={() => handleSubcategoryChange(mainCategory, sub)}
-                                    className={cn(
-                                        "flex items-center space-x-2 p-2 rounded-md cursor-pointer transition-colors",
-                                        selectedSubcategories.includes(sub) ? "bg-accent/20" : "hover:bg-muted"
-                                    )}
-                                >
-                                    <Checkbox
-                                      id={`${mainCategory}-${sub}`}
-                                      checked={selectedSubcategories.includes(sub)}
-                                      readOnly
-                                    />
-                                    <label
-                                      htmlFor={`${mainCategory}-${sub}`}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-grow cursor-pointer"
-                                    >
-                                      {sub}
-                                    </label>
-                                     {selectedSubcategories.includes(sub) && <CheckCircle2 className="h-4 w-4 text-accent" />}
-                                </div>
-                            ))}
-                           </div>
-                        </div>
+              <div key={mainCategory}>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-xl font-medium flex items-center gap-2">
+                        <CategoryIcon category={mainCategory} /> {mainCategory}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium">Difficulty</Label>
+                        <ToggleGroup
+                          type="single"
+                          defaultValue="Beginner"
+                          value={currentDifficulty}
+                          onValueChange={(value: Difficulty) => handleDifficultyChange(mainCategory, value)}
+                          className="grid grid-cols-2 mt-1"
+                        >
+                          <ToggleGroupItem value="Beginner" aria-label="Toggle Beginner">
+                            Beginner
+                          </ToggleGroupItem>
+                          <ToggleGroupItem value="Advanced" aria-label="Toggle Advanced">
+                            Advanced
+                          </ToggleGroupItem>
+                        </ToggleGroup>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
+                      
+                      <div className="space-y-2">
+                          <Label className="text-sm font-medium">Subcategories</Label>
+                          <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                          {subcategories.map(sub => (
+                              <div 
+                                  key={sub}
+                                  onClick={() => handleSubcategoryChange(mainCategory, sub)}
+                                  className={cn(
+                                      "flex items-center space-x-2 p-2 rounded-md cursor-pointer transition-colors",
+                                      selectedSubcategories.includes(sub) ? "bg-accent/20" : "hover:bg-muted"
+                                  )}
+                              >
+                                  <Checkbox
+                                    id={`${mainCategory}-${sub}`}
+                                    checked={selectedSubcategories.includes(sub)}
+                                    readOnly
+                                  />
+                                  <label
+                                    htmlFor={`${mainCategory}-${sub}`}
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-grow cursor-pointer"
+                                  >
+                                    {sub}
+                                  </label>
+                                    {selectedSubcategories.includes(sub) && <CheckCircle2 className="h-4 w-4 text-accent" />}
+                              </div>
+                          ))}
+                          </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             );
           })}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+      </div>
       <div className="mt-auto pt-4">
         <Button onClick={handleSave} className="w-full" size="lg">Save Selection</Button>
       </div>
