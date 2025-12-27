@@ -61,29 +61,31 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
   const { play: playEnd } = useSound('/sounds/ding.mp3', { volume: 0 });
   const { play: playCorrect } = useSound('/sounds/correct.mp3', { volume: -5 });
 
-  const { settings, currentTurn, currentRound } = gameState;
+  const { settings, currentTurn, currentRound, status } = gameState;
   const [timeLeft, setTimeLeft] = useState(settings.roundTime);
   const [wordHidden, setWordHidden] = useState(false);
   
   const currentTeam = useMemo(() => gameState.teams[currentTurn.teamIndex], [gameState.teams, currentTurn.teamIndex]);
 
   useEffect(() => {
-    if (!currentRound.wordRevealed) return;
+    if (status !== 'playing' || !currentRound.wordRevealed) {
+        stopTick();
+        return;
+    };
 
-    setTimeLeft(settings.roundTime);
     const timer = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
+        const newTime = prev - 1;
+        if (newTime <= 0) {
           clearInterval(timer);
-          dispatch({ type: 'TIME_UP' });
-          stopTick();
           playEnd();
+          dispatch({ type: 'TIME_UP' });
           return 0;
         }
-        if (prev <= 11 && prev > 1) { 
+        if (newTime <= 10) { 
             playTick();
         }
-        return prev - 1;
+        return newTime;
       });
     }, 1000);
 
@@ -91,10 +93,17 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
         clearInterval(timer);
         stopTick();
     };
-  }, [dispatch, settings.roundTime, currentRound.wordRevealed, playEnd, playTick, stopTick]);
+  }, [dispatch, status, currentRound.wordRevealed, playEnd, playTick, stopTick]);
+
+  useEffect(() => {
+    // Reset timer when a new word is revealed in the same turn (e.g. after a skip)
+    if (currentRound.wordRevealed) {
+        setTimeLeft(settings.roundTime);
+    }
+  }, [currentRound.word, currentRound.wordRevealed, settings.roundTime]);
+
 
   const handleCorrectGuess = () => {
-    stopTick();
     playCorrect();
     dispatch({ type: 'CORRECT_GUESS' });
   };
