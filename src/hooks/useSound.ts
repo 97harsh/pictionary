@@ -10,6 +10,7 @@ interface UseSoundOptions {
 
 export function useSound(url: string, { volume = 0, loop = false }: UseSoundOptions = {}) {
   const playerRef = useRef<Tone.Player | null>(null);
+  const loadedRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Ensure this runs only in the browser
@@ -19,17 +20,27 @@ export function useSound(url: string, { volume = 0, loop = false }: UseSoundOpti
       url,
       loop,
       onload: () => {
-        // console.log(`Sound loaded: ${url}`);
+        loadedRef.current = true;
+        console.log(`✅ Sound loaded: ${url}`);
       },
       onerror: (err) => {
-        console.error(`Error loading sound: ${url}`, err);
+        loadedRef.current = false;
+        console.warn(`⚠️ Sound file not found (optional): ${url}`);
       }
     }).toDestination();
     player.volume.value = volume;
     playerRef.current = player;
 
     return () => {
-      player?.dispose();
+      // Safely dispose player
+      try {
+        if (player.state === 'started') {
+          player.stop();
+        }
+        player.dispose();
+      } catch (e) {
+        // Silently handle disposal errors
+      }
     };
   }, [url, volume, loop]);
 
@@ -37,13 +48,19 @@ export function useSound(url: string, { volume = 0, loop = false }: UseSoundOpti
     // Ensure this runs only in the browser
     if (typeof window === 'undefined') return;
 
+    // Skip if sound file wasn't loaded
+    if (!loadedRef.current || !playerRef.current) {
+      console.warn('Sound not loaded, skipping playback');
+      return;
+    }
+
     try {
       await Tone.start();
       if (playerRef.current?.state !== 'started') {
           playerRef.current?.start();
       }
     } catch (e) {
-      console.error("Error starting Tone.js", e);
+      console.error('Error playing sound:', e);
     }
   }, []);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useGameEngine } from '@/hooks/useGameEngine';
+import { useWakeLock } from '@/hooks/useWakeLock';
 import SetupScreen from './SetupScreen';
 import PlayingScreen from './PlayingScreen';
 import GameOverScreen from './GameOverScreen';
@@ -10,6 +11,9 @@ import { Card, CardContent } from '../ui/card';
 
 export default function GameController() {
   const { gameState, dispatch } = useGameEngine();
+
+  // Prevent screen from sleeping during active gameplay
+  useWakeLock(gameState.status === 'playing');
 
   const renderScreen = () => {
     switch (gameState.status) {
