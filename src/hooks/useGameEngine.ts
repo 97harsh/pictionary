@@ -181,7 +181,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           const maxScore = Math.max(...state.teams.map(t => t.score));
           const winners = state.teams.filter(t => t.score === maxScore);
 
-          // If there's a tie, continue playing
+          // If there's a tie, continue playing - start a new tiebreaker round from first team
           if (winners.length > 1) {
             const newWordData = getNewWord(state.usedWords, state.settings.categories);
 
@@ -194,7 +194,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
               status: 'turn_start',
               roundWinner: null,
               currentTurn: {
-                teamIndex: nextTeamIndex,
+                teamIndex: 0, // Start from first team for fair tiebreaker
                 roundNumber: nextRoundNumber,
               },
               currentRound: {

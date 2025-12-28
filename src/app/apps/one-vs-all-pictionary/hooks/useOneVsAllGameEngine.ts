@@ -238,7 +238,7 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
               status: 'turn_start',
               roundWinner: null,
               currentTurn: {
-                drawerIndex: nextDrawerIndex,
+                drawerIndex: 0, // Start from first drawer for fair tiebreaker
                 roundNumber: nextRoundNumber,
               },
               currentRound: {
@@ -313,7 +313,7 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
               status: 'turn_start',
               roundWinner: null,
               currentTurn: {
-                drawerIndex: nextDrawerIndex,
+                drawerIndex: 0, // Start from first drawer for fair tiebreaker
                 roundNumber: nextRoundNumber,
               },
               currentRound: {
