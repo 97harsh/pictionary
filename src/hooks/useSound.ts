@@ -21,11 +21,11 @@ export function useSound(url: string, { volume = 0, loop = false }: UseSoundOpti
       loop,
       onload: () => {
         loadedRef.current = true;
-        // console.log(`Sound loaded: ${url}`);
+        console.log(`✅ Sound loaded: ${url}`);
       },
       onerror: (err) => {
         loadedRef.current = false;
-        console.warn(`Sound file not found (optional): ${url}`);
+        console.warn(`⚠️ Sound file not found (optional): ${url}`);
       }
     }).toDestination();
     player.volume.value = volume;
@@ -49,7 +49,10 @@ export function useSound(url: string, { volume = 0, loop = false }: UseSoundOpti
     if (typeof window === 'undefined') return;
 
     // Skip if sound file wasn't loaded
-    if (!loadedRef.current || !playerRef.current) return;
+    if (!loadedRef.current || !playerRef.current) {
+      console.warn('Sound not loaded, skipping playback');
+      return;
+    }
 
     try {
       await Tone.start();
@@ -57,7 +60,7 @@ export function useSound(url: string, { volume = 0, loop = false }: UseSoundOpti
           playerRef.current?.start();
       }
     } catch (e) {
-      // Silently fail if sound can't play
+      console.error('Error playing sound:', e);
     }
   }, []);
 
