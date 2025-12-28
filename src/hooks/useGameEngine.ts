@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useReducer, useEffect, useCallback } from 'react';
@@ -204,7 +205,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-const STORAGE_KEY = 'pictogame_master_state';
+const STORAGE_KEY = 'offline_pictionary_state';
 
 export function useGameEngine() {
   const [state, dispatch] = useReducer(gameReducer, initialState);

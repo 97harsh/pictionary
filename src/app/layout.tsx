@@ -6,7 +6,7 @@ import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'PictoGame Master',
+  title: 'Offline Pictionary',
   description: 'A digital game master for your Pictionary games.',
 };
 

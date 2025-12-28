@@ -106,7 +106,7 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tighter text-primary">PictoGame Master</h1>
+        <h1 className="text-4xl font-bold tracking-tighter text-primary">Offline Pictionary</h1>
         <p className="text-muted-foreground">Your digital assistant for Pictionary!</p>
       </div>
       
