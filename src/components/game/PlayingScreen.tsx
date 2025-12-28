@@ -58,7 +58,7 @@ const WordDisplay = ({ word, revealed, hidden, onReveal, onHide, onShow }: { wor
 
 
 export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProps) {
-  const { play: playTick, stop: stopTick } = useSound('/sounds/tick.wav', { volume: -10, loop: true });
+  const { play: playTick, stop: stopTick } = useSound('/sounds/tick.wav', { volume: -10, loop: false });
   const { play: playEnd } = useSound('/sounds/timesup.wav', { volume: 0 });
   const { play: playCorrect } = useSound('/sounds/correct.wav', { volume: -5 });
   const haptic = useHaptic();
@@ -71,7 +71,6 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
 
   useEffect(() => {
     if (status !== 'playing' || !currentRound.wordRevealed) {
-        stopTick();
         return;
     };
 
@@ -80,12 +79,13 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
         const newTime = prev - 1;
         if (newTime <= 0) {
           clearInterval(timer);
+          stopTick();
           playEnd();
           // Use setTimeout to avoid dispatching during render
           setTimeout(() => dispatch({ type: 'TIME_UP' }), 0);
           return 0;
         }
-        if (newTime <= 10) {
+        if (newTime <= 10 && newTime > 0) {
             playTick();
         }
         return newTime;
