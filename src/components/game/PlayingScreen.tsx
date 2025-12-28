@@ -81,8 +81,8 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
           clearInterval(timer);
           stopTick();
           playEnd();
-          // Use setTimeout to avoid dispatching during render
-          setTimeout(() => dispatch({ type: 'TIME_UP' }), 0);
+          // Delay state change to allow timesup sound to play (timesup.wav is ~239KB, needs ~1-2 seconds)
+          setTimeout(() => dispatch({ type: 'TIME_UP' }), 2000);
           return 0;
         }
         if (newTime <= 10 && newTime > 0) {
