@@ -6,6 +6,9 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
+    # Add repo owner as reviewer
+    reviewers:
+      - "97harsh"
     # Group updates to reduce PR count
     groups:
       # Group all production dependencies together
@@ -43,6 +46,9 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
+    # Add repo owner as reviewer
+    reviewers:
+      - "97harsh"
     labels:
       - "dependencies"
       - "github-actions"
