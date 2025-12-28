@@ -10,6 +10,7 @@ export interface OneVsAllGameSettings {
   roundTime: number;
   skipLimit: number;
   winningScore: number;
+  totalRounds: number;
   categories: SelectedCategories;
   penalizeDrawer: boolean;
 }
@@ -20,6 +21,7 @@ export interface OneVsAllGameState {
   settings: OneVsAllGameSettings;
   currentTurn: {
     drawerIndex: number;
+    roundNumber: number;
   };
   currentRound: {
     word: string;
@@ -56,11 +58,13 @@ const initialState: OneVsAllGameState = {
     roundTime: 60,
     skipLimit: 3,
     winningScore: 20,
+    totalRounds: 5,
     categories: {},
     penalizeDrawer: true,
   },
   currentTurn: {
     drawerIndex: 0,
+    roundNumber: 1,
   },
   currentRound: {
     word: '',
@@ -135,12 +139,14 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const guesser = newPlayers.find(p => p.id === action.guesserId)!;
       guesser.score += 1;
 
-      const winner = newPlayers.find(p => p.score >= state.settings.winningScore);
+      // Check if game should end by rounds or score
+      const endByScore = state.settings.winningScore > 0 && newPlayers.find(p => p.score >= state.settings.winningScore);
+      const endByRounds = state.settings.totalRounds > 0 && state.currentTurn.roundNumber >= state.settings.totalRounds;
 
       return {
         ...state,
         players: newPlayers,
-        status: winner ? 'game_over' : 'round_end',
+        status: (endByScore || endByRounds) ? 'game_over' : 'round_end',
         roundWinner: guesser,
         currentRound: {
           ...state.currentRound,
@@ -211,6 +217,16 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
 
     case 'FORFEIT_ROUND': {
       const nextDrawerIndex = (state.currentTurn.drawerIndex + 1) % state.players.length;
+      const isNewRound = nextDrawerIndex === 0;
+      const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
+
+      // Check if we've completed all rounds
+      const endByRounds = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+
+      if (endByRounds) {
+        return { ...state, status: 'game_over' };
+      }
+
       const newWordData = getNewWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
@@ -223,6 +239,7 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
         roundWinner: null,
         currentTurn: {
             drawerIndex: nextDrawerIndex,
+            roundNumber: nextRoundNumber,
         },
         currentRound: {
             word: newWordData.word,
@@ -239,6 +256,16 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
 
     case 'ADVANCE_TURN': {
       const nextDrawerIndex = (state.currentTurn.drawerIndex + 1) % state.players.length;
+      const isNewRound = nextDrawerIndex === 0;
+      const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
+
+      // Check if we've completed all rounds
+      const endByRounds = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+
+      if (endByRounds) {
+        return { ...state, status: 'game_over' };
+      }
+
       const newWordData = getNewWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
@@ -251,6 +278,7 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
         roundWinner: null,
         currentTurn: {
             drawerIndex: nextDrawerIndex,
+            roundNumber: nextRoundNumber,
         },
         currentRound: {
             word: newWordData.word,
