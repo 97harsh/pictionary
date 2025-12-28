@@ -216,8 +216,8 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const isNewRound = nextDrawerIndex === 0;
       const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
 
-      // Check if we've completed all rounds
-      const roundsComplete = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+      // Check if we've completed all rounds (only check when cycling back to first player)
+      const roundsComplete = isNewRound && state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
 
       if (roundsComplete) {
         // Check for tiebreaker logic
@@ -291,8 +291,8 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const isNewRound = nextDrawerIndex === 0;
       const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
 
-      // Check if we've completed all rounds
-      const roundsComplete = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+      // Check if we've completed all rounds (only check when cycling back to first player)
+      const roundsComplete = isNewRound && state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
 
       if (roundsComplete) {
         // Check for tiebreaker logic
