@@ -9,7 +9,7 @@ import { Check, SkipForward, Eye, EyeOff } from 'lucide-react';
 import CategoryIcon from '../icons/CategoryIcon';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
-import EndGameButton from './EndGameButton';
+import ForfeitButton from './ForfeitButton';
 
 type PlayingScreenProps = {
   gameState: GameState;
@@ -191,7 +191,7 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
       </div>
       }
       <div className="w-full pt-4">
-        <EndGameButton dispatch={dispatch} />
+        <ForfeitButton dispatch={dispatch} />
       </div>
     </div>
   );
