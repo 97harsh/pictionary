@@ -127,13 +127,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const newTeams = [...state.teams];
       newTeams[state.currentTurn.teamIndex].score += 10;
 
-      // Check if game should end by rounds
-      const endByRounds = state.settings.totalRounds > 0 && state.currentTurn.roundNumber >= state.settings.totalRounds;
-
       return {
         ...state,
         teams: newTeams,
-        status: endByRounds ? 'game_over' : 'round_end',
+        status: 'round_end',
         roundWinner: state.teams[state.currentTurn.teamIndex],
       };
     }

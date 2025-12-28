@@ -139,13 +139,10 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const guesser = newPlayers.find(p => p.id === action.guesserId)!;
       guesser.score += 1;
 
-      // Check if game should end by rounds
-      const endByRounds = state.settings.totalRounds > 0 && state.currentTurn.roundNumber >= state.settings.totalRounds;
-
       return {
         ...state,
         players: newPlayers,
-        status: endByRounds ? 'game_over' : 'round_end',
+        status: 'round_end',
         roundWinner: guesser,
         currentRound: {
           ...state.currentRound,
