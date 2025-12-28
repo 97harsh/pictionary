@@ -10,23 +10,20 @@ updates:
     reviewers:
       - "97harsh"
     # Group updates to reduce PR count
+    # Note: Major updates are NOT grouped to avoid peer dependency conflicts
     groups:
-      # Group all production dependencies together
+      # Group all production dependencies together (minor and patch only)
       production-dependencies:
         dependency-type: "production"
         update-types:
           - "minor"
           - "patch"
-      # Group all development dependencies together
+      # Group all development dependencies together (minor and patch only)
       development-dependencies:
         dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
-      # Separate group for major updates (more caution needed)
-      major-dependencies:
-        update-types:
-          - "major"
     # Auto-label PRs for easier filtering
     labels:
       - "dependencies"
