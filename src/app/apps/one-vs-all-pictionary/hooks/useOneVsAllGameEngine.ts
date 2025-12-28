@@ -9,8 +9,8 @@ export type Player = Team;
 export interface OneVsAllGameSettings {
   roundTime: number;
   skipLimit: number;
-  winningScore: number;
   totalRounds: number;
+  playUntilWinner: boolean;
   categories: SelectedCategories;
   penalizeDrawer: boolean;
 }
@@ -57,8 +57,8 @@ const initialState: OneVsAllGameState = {
   settings: {
     roundTime: 60,
     skipLimit: 3,
-    winningScore: 20,
     totalRounds: 5,
+    playUntilWinner: false,
     categories: {},
     penalizeDrawer: true,
   },
@@ -139,14 +139,13 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const guesser = newPlayers.find(p => p.id === action.guesserId)!;
       guesser.score += 1;
 
-      // Check if game should end by rounds or score
-      const endByScore = state.settings.winningScore > 0 && newPlayers.find(p => p.score >= state.settings.winningScore);
+      // Check if game should end by rounds
       const endByRounds = state.settings.totalRounds > 0 && state.currentTurn.roundNumber >= state.settings.totalRounds;
 
       return {
         ...state,
         players: newPlayers,
-        status: (endByScore || endByRounds) ? 'game_over' : 'round_end',
+        status: endByRounds ? 'game_over' : 'round_end',
         roundWinner: guesser,
         currentRound: {
           ...state.currentRound,
@@ -221,9 +220,45 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
 
       // Check if we've completed all rounds
-      const endByRounds = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+      const roundsComplete = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
 
-      if (endByRounds) {
+      if (roundsComplete) {
+        // Check for tiebreaker logic
+        if (state.settings.playUntilWinner) {
+          const maxScore = Math.max(...state.players.map(p => p.score));
+          const winners = state.players.filter(p => p.score === maxScore);
+
+          // If there's a tie, continue playing
+          if (winners.length > 1) {
+            const newWordData = getNewWord(state.usedWords, state.settings.categories);
+
+            if (!newWordData) {
+              return { ...state, status: 'game_over' };
+            }
+
+            return {
+              ...state,
+              status: 'turn_start',
+              roundWinner: null,
+              currentTurn: {
+                drawerIndex: nextDrawerIndex,
+                roundNumber: nextRoundNumber,
+              },
+              currentRound: {
+                word: newWordData.word,
+                category: newWordData.category,
+                subCategory: newWordData.subCategory,
+                skipsUsed: 0,
+                wordRevealed: false,
+                correctGuesserId: null,
+                anyoneGuessed: false,
+              },
+              usedWords: [...state.usedWords, newWordData.word],
+            };
+          }
+        }
+
+        // No tiebreaker or clear winner - end game
         return { ...state, status: 'game_over' };
       }
 
@@ -260,9 +295,45 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
 
       // Check if we've completed all rounds
-      const endByRounds = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+      const roundsComplete = state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
 
-      if (endByRounds) {
+      if (roundsComplete) {
+        // Check for tiebreaker logic
+        if (state.settings.playUntilWinner) {
+          const maxScore = Math.max(...state.players.map(p => p.score));
+          const winners = state.players.filter(p => p.score === maxScore);
+
+          // If there's a tie, continue playing
+          if (winners.length > 1) {
+            const newWordData = getNewWord(state.usedWords, state.settings.categories);
+
+            if (!newWordData) {
+              return { ...state, status: 'game_over' };
+            }
+
+            return {
+              ...state,
+              status: 'turn_start',
+              roundWinner: null,
+              currentTurn: {
+                drawerIndex: nextDrawerIndex,
+                roundNumber: nextRoundNumber,
+              },
+              currentRound: {
+                word: newWordData.word,
+                category: newWordData.category,
+                subCategory: newWordData.subCategory,
+                skipsUsed: 0,
+                wordRevealed: false,
+                correctGuesserId: null,
+                anyoneGuessed: false,
+              },
+              usedWords: [...state.usedWords, newWordData.word],
+            };
+          }
+        }
+
+        // No tiebreaker or clear winner - end game
         return { ...state, status: 'game_over' };
       }
 
