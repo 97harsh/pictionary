@@ -58,9 +58,9 @@ const WordDisplay = ({ word, revealed, hidden, onReveal, onHide, onShow }: { wor
 
 
 export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProps) {
-  const { play: playTick, stop: stopTick } = useSound('/sounds/tick.mp3', { volume: -10, loop: true });
-  const { play: playEnd } = useSound('/sounds/ding.mp3', { volume: 0 });
-  const { play: playCorrect } = useSound('/sounds/correct.mp3', { volume: -5 });
+  const { play: playTick, stop: stopTick } = useSound('/sounds/tick.wav', { volume: -10, loop: true });
+  const { play: playEnd } = useSound('/sounds/timesup.wav', { volume: 0 });
+  const { play: playCorrect } = useSound('/sounds/correct.wav', { volume: -5 });
   const haptic = useHaptic();
 
   const { settings, currentTurn, currentRound, status } = gameState;
@@ -81,10 +81,11 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
         if (newTime <= 0) {
           clearInterval(timer);
           playEnd();
-          dispatch({ type: 'TIME_UP' });
+          // Use setTimeout to avoid dispatching during render
+          setTimeout(() => dispatch({ type: 'TIME_UP' }), 0);
           return 0;
         }
-        if (newTime <= 10) { 
+        if (newTime <= 10) {
             playTick();
         }
         return newTime;
