@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/
 import { Check, SkipForward, Eye, EyeOff } from 'lucide-react';
 import CategoryIcon from '../icons/CategoryIcon';
 import { useSound } from '@/hooks/useSound';
+import { useHaptic } from '@/hooks/useHaptic';
 import EndGameButton from './EndGameButton';
 
 type PlayingScreenProps = {
@@ -45,7 +46,7 @@ const WordDisplay = ({ word, revealed, hidden, onReveal, onHide, onShow }: { wor
 
     return (
         <div className="text-center w-full animate-in fade-in duration-500">
-            <h2 className="text-5xl md:text-6xl font-bold tracking-wider text-center break-words">
+            <h2 className="text-7xl md:text-8xl lg:text-9xl font-bold tracking-wide text-center break-words leading-tight">
                 {word}
             </h2>
             <Button onClick={onHide} variant="ghost" size="sm" className="mt-4 text-muted-foreground">
@@ -60,11 +61,12 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
   const { play: playTick, stop: stopTick } = useSound('/sounds/tick.mp3', { volume: -10, loop: true });
   const { play: playEnd } = useSound('/sounds/ding.mp3', { volume: 0 });
   const { play: playCorrect } = useSound('/sounds/correct.mp3', { volume: -5 });
+  const haptic = useHaptic();
 
   const { settings, currentTurn, currentRound, status } = gameState;
   const [timeLeft, setTimeLeft] = useState(settings.roundTime);
   const [wordHidden, setWordHidden] = useState(false);
-  
+
   const currentTeam = useMemo(() => gameState.teams[currentTurn.teamIndex], [gameState.teams, currentTurn.teamIndex]);
 
   useEffect(() => {
@@ -104,11 +106,13 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
 
 
   const handleCorrectGuess = () => {
+    haptic.success();
     playCorrect();
     dispatch({ type: 'CORRECT_GUESS' });
   };
-  
+
   const handleSkipWord = () => {
+    haptic.tap();
     dispatch({ type: 'SKIP_WORD' });
     setWordHidden(false);
   };
@@ -127,11 +131,11 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
         <p className="text-2xl font-bold">{currentTeam.score} points</p>
       </div>
 
-      <Card className="w-full flex-grow flex flex-col items-center justify-center p-6 bg-card/50">
+      <Card className="w-full flex-grow flex flex-col items-center justify-center p-6 bg-card shadow-xl border-4">
         <CardHeader className="items-center text-center p-2">
-            <div className="flex items-center gap-2 text-muted-foreground">
-                <CategoryIcon category={currentRound.category} />
-                <CardDescription className="text-lg">{currentRound.subCategory}</CardDescription>
+            <div className="flex items-center gap-3 text-foreground">
+                <CategoryIcon category={currentRound.category} className="h-10 w-10" />
+                <CardDescription className="text-2xl font-semibold">{currentRound.subCategory}</CardDescription>
             </div>
         </CardHeader>
         <CardContent className="flex-grow flex items-center justify-center w-full">
@@ -150,30 +154,37 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
       <div className="w-full space-y-6 animate-in fade-in duration-500">
         <div className="flex justify-center items-center">
             <div
-                className="relative h-40 w-40 rounded-full flex items-center justify-center transition-all duration-1000"
+                className="relative h-48 w-48 md:h-56 md:w-56 rounded-full flex items-center justify-center transition-all duration-1000"
                 style={{
                     background: `
                         radial-gradient(closest-side, hsl(var(--card)) 79%, transparent 80% 100%),
-                        conic-gradient(${timeLeft <= 10 ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'} ${progressAngle}deg, hsl(var(--muted)) 0)
+                        conic-gradient(${
+                          timeLeft <= 10
+                            ? 'hsl(var(--timer-danger))'
+                            : timeLeft <= 30
+                              ? 'hsl(var(--timer-warning))'
+                              : 'hsl(var(--primary))'
+                        } ${progressAngle}deg, hsl(var(--muted)) 0)
                     `,
+                    boxShadow: timeLeft <= 10 ? '0 0 40px hsla(0, 84%, 60%, 0.5)' : 'none'
                 }}
             >
-                <p className="text-center text-5xl font-mono font-bold">{timeLeft}</p>
+                <p className="text-center text-6xl md:text-7xl font-mono font-bold">{timeLeft}</p>
             </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <Button 
-            onClick={handleSkipWord} 
-            variant="outline" 
-            size="lg" 
-            className="h-20 text-xl"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          <Button
+            onClick={handleSkipWord}
+            variant="outline"
+            size="lg"
+            className="h-24 md:h-28 text-2xl md:text-3xl font-bold border-4"
             disabled={currentRound.skipsUsed >= settings.skipLimit}
           >
-            <SkipForward className="mr-2 h-6 w-6" /> Skip ({settings.skipLimit - currentRound.skipsUsed})
+            <SkipForward className="mr-3 h-10 w-10" /> SKIP ({settings.skipLimit - currentRound.skipsUsed})
           </Button>
-          <Button onClick={handleCorrectGuess} size="lg" className="h-20 text-xl bg-green-600 hover:bg-green-700">
-            <Check className="mr-2 h-8 w-8" /> Correct!
+          <Button onClick={handleCorrectGuess} size="lg" className="h-24 md:h-28 text-2xl md:text-3xl font-bold bg-accent hover:bg-accent/90">
+            <Check className="mr-3 h-12 w-12" /> GOT IT!
           </Button>
         </div>
       </div>
