@@ -13,10 +13,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { X, Plus, Gamepad2, Settings, BookOpen } from 'lucide-react';
+import { X, Plus, Gamepad2, Settings, BookOpen, ArrowLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import CategorySelectionScreen from './CategorySelectionScreen';
 import type { SelectedCategories } from '@/lib/words';
+import Link from 'next/link';
 
 
 type SetupScreenProps = {
@@ -211,9 +212,17 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
         </Dialog>
       </div>
 
-      <Button onClick={handleStartGame} size="lg" className="w-full text-lg bg-accent hover:bg-accent/90">
-        Start Game
-      </Button>
+      <div className="space-y-4">
+        <Button onClick={handleStartGame} size="lg" className="w-full text-lg bg-accent hover:bg-accent/90">
+            Start Game
+        </Button>
+        <Link href="/" passHref className="block">
+            <Button variant="outline" className="w-full">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                All Games
+            </Button>
+        </Link>
+      </div>
     </div>
   );
 }
