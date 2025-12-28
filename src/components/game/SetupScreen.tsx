@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -29,7 +30,9 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
   const [roundTime, setRoundTime] = useState<number>(60);
   const [isCustomTime, setIsCustomTime] = useState(false);
   const [skipLimit, setSkipLimit] = useState<number>(3);
-  const [winningScore, setWinningScore] = useState<number>(50);
+  const [totalRounds, setTotalRounds] = useState<number>(5);
+  const [isCustomRounds, setIsCustomRounds] = useState(false);
+  const [playUntilWinner, setPlayUntilWinner] = useState<boolean>(false);
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>({
     'General': { difficulty: 'Beginner', subcategories: ['Objects', 'Actions'] },
   });
@@ -95,11 +98,29 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
         return;
     }
 
+    if (isCustomRounds && (totalRounds <= 0 || isNaN(totalRounds))) {
+        toast({
+            title: 'Invalid Custom Rounds',
+            description: 'Please enter a valid number of rounds.',
+            variant: 'destructive'
+        });
+        return;
+    }
+
     dispatch({
       type: 'START_GAME',
       teams: teams.map(t => t.trim()).filter(Boolean),
-      settings: { roundTime, skipLimit, winningScore, categories: selectedCategories },
+      settings: { roundTime, skipLimit, totalRounds, playUntilWinner, categories: selectedCategories },
     });
+  };
+
+  const handleRoundsChange = (value: string) => {
+    if (value === 'custom') {
+      setIsCustomRounds(true);
+    } else {
+      setIsCustomRounds(false);
+      setTotalRounds(Number(value));
+    }
   };
 
   const selectedSubcategoryCount = Object.values(selectedCategories).reduce((acc, cat) => acc + (cat.subcategories?.length || 0), 0);
@@ -149,7 +170,7 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
               </SelectContent>
             </Select>
             {isCustomTime && (
-                <Input 
+                <Input
                     type="number"
                     placeholder="Seconds"
                     value={roundTime}
@@ -171,16 +192,39 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
             </Select>
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="winning-score">Winning Score</Label>
-             <Select onValueChange={value => setWinningScore(Number(value))} defaultValue={String(winningScore)}>
-              <SelectTrigger id="winning-score"><SelectValue placeholder="Select score" /></SelectTrigger>
+            <Label htmlFor="total-rounds">Total Rounds</Label>
+            <Select onValueChange={handleRoundsChange} defaultValue={String(totalRounds)}>
+              <SelectTrigger id="total-rounds"><SelectValue placeholder="Select rounds" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="30">30 points</SelectItem>
-                <SelectItem value="50">50 points</SelectItem>
-                <SelectItem value="100">100 points</SelectItem>
+                <SelectItem value="3">3 rounds</SelectItem>
+                <SelectItem value="5">5 rounds</SelectItem>
+                <SelectItem value="7">7 rounds</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
               </SelectContent>
             </Select>
+            {isCustomRounds && (
+                <Input
+                    type="number"
+                    placeholder="Number of rounds"
+                    value={totalRounds}
+                    onChange={(e) => setTotalRounds(Number(e.target.value))}
+                    className="mt-2"
+                />
+            )}
           </div>
+        </div>
+        <div className="flex items-center space-x-2 pt-2">
+          <Checkbox
+            id="play-until-winner"
+            checked={playUntilWinner}
+            onCheckedChange={(checked) => setPlayUntilWinner(checked as boolean)}
+          />
+          <Label
+            htmlFor="play-until-winner"
+            className="text-sm font-normal cursor-pointer"
+          >
+            Play until clear winner (continue if tied after final round)
+          </Label>
         </div>
       </div>
       

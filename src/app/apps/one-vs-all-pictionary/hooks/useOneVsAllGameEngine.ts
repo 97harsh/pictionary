@@ -9,7 +9,8 @@ export type Player = Team;
 export interface OneVsAllGameSettings {
   roundTime: number;
   skipLimit: number;
-  winningScore: number;
+  totalRounds: number;
+  playUntilWinner: boolean;
   categories: SelectedCategories;
   penalizeDrawer: boolean;
 }
@@ -20,6 +21,7 @@ export interface OneVsAllGameState {
   settings: OneVsAllGameSettings;
   currentTurn: {
     drawerIndex: number;
+    roundNumber: number;
   };
   currentRound: {
     word: string;
@@ -55,12 +57,14 @@ const initialState: OneVsAllGameState = {
   settings: {
     roundTime: 60,
     skipLimit: 3,
-    winningScore: 20,
+    totalRounds: 5,
+    playUntilWinner: false,
     categories: {},
     penalizeDrawer: true,
   },
   currentTurn: {
     drawerIndex: 0,
+    roundNumber: 1,
   },
   currentRound: {
     word: '',
@@ -135,12 +139,10 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
       const guesser = newPlayers.find(p => p.id === action.guesserId)!;
       guesser.score += 1;
 
-      const winner = newPlayers.find(p => p.score >= state.settings.winningScore);
-
       return {
         ...state,
         players: newPlayers,
-        status: winner ? 'game_over' : 'round_end',
+        status: 'round_end',
         roundWinner: guesser,
         currentRound: {
           ...state.currentRound,
@@ -211,6 +213,52 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
 
     case 'FORFEIT_ROUND': {
       const nextDrawerIndex = (state.currentTurn.drawerIndex + 1) % state.players.length;
+      const isNewRound = nextDrawerIndex === 0;
+      const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
+
+      // Check if we've completed all rounds (only check when cycling back to first player)
+      const roundsComplete = isNewRound && state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+
+      if (roundsComplete) {
+        // Check for tiebreaker logic
+        if (state.settings.playUntilWinner) {
+          const maxScore = Math.max(...state.players.map(p => p.score));
+          const winners = state.players.filter(p => p.score === maxScore);
+
+          // If there's a tie, continue playing
+          if (winners.length > 1) {
+            const newWordData = getNewWord(state.usedWords, state.settings.categories);
+
+            if (!newWordData) {
+              return { ...state, status: 'game_over' };
+            }
+
+            return {
+              ...state,
+              status: 'turn_start',
+              roundWinner: null,
+              currentTurn: {
+                drawerIndex: 0, // Start from first drawer for fair tiebreaker
+                roundNumber: nextRoundNumber,
+              },
+              currentRound: {
+                word: newWordData.word,
+                category: newWordData.category,
+                subCategory: newWordData.subCategory,
+                skipsUsed: 0,
+                wordRevealed: false,
+                correctGuesserId: null,
+                anyoneGuessed: false,
+              },
+              usedWords: [...state.usedWords, newWordData.word],
+            };
+          }
+        }
+
+        // No tiebreaker or clear winner - end game
+        return { ...state, status: 'game_over' };
+      }
+
       const newWordData = getNewWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
@@ -223,6 +271,7 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
         roundWinner: null,
         currentTurn: {
             drawerIndex: nextDrawerIndex,
+            roundNumber: nextRoundNumber,
         },
         currentRound: {
             word: newWordData.word,
@@ -239,6 +288,52 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
 
     case 'ADVANCE_TURN': {
       const nextDrawerIndex = (state.currentTurn.drawerIndex + 1) % state.players.length;
+      const isNewRound = nextDrawerIndex === 0;
+      const nextRoundNumber = isNewRound ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
+
+      // Check if we've completed all rounds (only check when cycling back to first player)
+      const roundsComplete = isNewRound && state.settings.totalRounds > 0 && nextRoundNumber > state.settings.totalRounds;
+
+      if (roundsComplete) {
+        // Check for tiebreaker logic
+        if (state.settings.playUntilWinner) {
+          const maxScore = Math.max(...state.players.map(p => p.score));
+          const winners = state.players.filter(p => p.score === maxScore);
+
+          // If there's a tie, continue playing
+          if (winners.length > 1) {
+            const newWordData = getNewWord(state.usedWords, state.settings.categories);
+
+            if (!newWordData) {
+              return { ...state, status: 'game_over' };
+            }
+
+            return {
+              ...state,
+              status: 'turn_start',
+              roundWinner: null,
+              currentTurn: {
+                drawerIndex: 0, // Start from first drawer for fair tiebreaker
+                roundNumber: nextRoundNumber,
+              },
+              currentRound: {
+                word: newWordData.word,
+                category: newWordData.category,
+                subCategory: newWordData.subCategory,
+                skipsUsed: 0,
+                wordRevealed: false,
+                correctGuesserId: null,
+                anyoneGuessed: false,
+              },
+              usedWords: [...state.usedWords, newWordData.word],
+            };
+          }
+        }
+
+        // No tiebreaker or clear winner - end game
+        return { ...state, status: 'game_over' };
+      }
+
       const newWordData = getNewWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
@@ -251,6 +346,7 @@ function gameReducer(state: OneVsAllGameState, action: GameAction): OneVsAllGame
         roundWinner: null,
         currentTurn: {
             drawerIndex: nextDrawerIndex,
+            roundNumber: nextRoundNumber,
         },
         currentRound: {
             word: newWordData.word,
