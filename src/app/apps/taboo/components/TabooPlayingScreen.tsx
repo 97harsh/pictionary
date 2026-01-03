@@ -156,12 +156,6 @@ export default function TabooPlayingScreen({ gameState, dispatch }: TabooPlaying
   };
 
   const handleViolation = () => {
-    toast({
-      title: "Taboo Violation!",
-      description: `${currentTeam.name} loses 1 point and their turn ends!`,
-      variant: "destructive",
-      duration: 3000,
-    });
     dispatch({ type: 'TABOO_VIOLATION' });
     setWordHidden(false);
   };

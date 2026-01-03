@@ -31,12 +31,7 @@ export default function TabooRoundEndScreen({ gameState, dispatch }: TabooRoundE
             <div className="space-y-2">
                 <h2 className="text-lg text-muted-foreground">Round {gameState.currentTurn.roundNumber}</h2>
                 <h3 className="text-4xl font-bold">{currentTeam.name}'s Turn</h3>
-                {currentRound.violations > 0 ? (
-                    <div className="space-y-1">
-                        <p className="text-2xl text-destructive font-bold">Taboo Violation!</p>
-                        <p className="text-lg text-muted-foreground">Lost 1 point</p>
-                    </div>
-                ) : currentRound.wordsGuessed > 0 ? (
+                {currentRound.wordsGuessed > 0 ? (
                     <p className="text-xl text-green-400">
                         Scored {currentRound.wordsGuessed} word{currentRound.wordsGuessed > 1 ? 's' : ''}!
                     </p>
@@ -75,7 +70,7 @@ export default function TabooRoundEndScreen({ gameState, dispatch }: TabooRoundE
                         <div className="flex items-center justify-center gap-2 text-destructive">
                             <AlertCircle className="h-5 w-5" />
                             <p className="text-lg font-semibold">
-                                {currentRound.violations} violation{currentRound.violations > 1 ? 's' : ''} this round
+                                Violation this round
                             </p>
                         </div>
                     </CardContent>
