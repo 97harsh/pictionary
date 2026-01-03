@@ -17,6 +17,7 @@ import { X, Plus, Gamepad2, Settings, BookOpen, ArrowLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import CategorySelectionScreen from './CategorySelectionScreen';
 import type { SelectedCategories } from '@/lib/words';
+import { WORDS } from '@/lib/words';
 import Link from 'next/link';
 
 
@@ -200,7 +201,8 @@ export default function SetupScreen({ dispatch }: SetupScreenProps) {
                     <DialogTitle>Select Word Categories</DialogTitle>
                 </DialogHeader>
                 <div className="flex-grow overflow-y-auto -mx-6 px-6">
-                    <CategorySelectionScreen 
+                    <CategorySelectionScreen
+                        wordsStructure={WORDS}
                         initialSelection={selectedCategories}
                         onSave={(newSelection) => {
                             setSelectedCategories(newSelection);

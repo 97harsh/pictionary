@@ -24,6 +24,7 @@ import { X, Plus, Users, Settings, BookOpen, ArrowLeft, HelpCircle, AlertCircle 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import CategorySelectionScreen from '@/components/game/CategorySelectionScreen';
 import type { SelectedCategories } from '@/lib/words';
+import { WORDS } from '@/lib/words';
 import Link from 'next/link';
 
 type OneVsAllSetupScreenProps = {
@@ -244,6 +245,7 @@ export default function OneVsAllSetupScreen({ dispatch }: OneVsAllSetupScreenPro
                 </DialogHeader>
                 <div className="flex-grow overflow-y-auto -mx-6 px-6">
                     <CategorySelectionScreen
+                        wordsStructure={WORDS}
                         initialSelection={selectedCategories}
                         onSave={(newSelection) => {
                             setSelectedCategories(newSelection);
