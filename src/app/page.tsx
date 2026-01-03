@@ -61,7 +61,12 @@ export default function AppHub() {
                 <p className="text-muted-foreground text-lg">No apps found matching your search.</p>
             </div>
         )}
-      </div>
+            </div>
+            <footer className="w-full mt-12">
+              <div className="max-w-4xl mx-auto text-center py-6 text-sm text-muted-foreground">
+                Harsh Sharma | harshsrharsh@gmail.com
+              </div>
+            </footer>
     </main>
   );
 }
