@@ -103,16 +103,9 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Taboo Setup</h1>
-          <p className="text-muted-foreground">Describe words without saying the taboo words!</p>
-        </div>
-        <Link href="/">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
+      <div className="text-center">
+        <h1 className="text-4xl font-bold tracking-tighter text-primary">Taboo Setup</h1>
+        <p className="text-muted-foreground">Describe words without saying the taboo words!</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -274,9 +267,17 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
         </Dialog>
       </div>
 
-      <Button onClick={handleStartGame} className="w-full" size="lg">
-        Start Game
-      </Button>
+      <div className="space-y-4">
+        <Button onClick={handleStartGame} size="lg" className="w-full text-lg bg-accent hover:bg-accent/90">
+          Start Game
+        </Button>
+        <Link href="/" passHref className="block">
+          <Button variant="outline" className="w-full">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            All Games
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }
