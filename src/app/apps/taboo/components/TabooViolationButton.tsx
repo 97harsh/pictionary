@@ -25,7 +25,7 @@ export default function TabooViolationButton({ onViolation, disabled }: TabooVio
       onClick={handleViolation}
       variant="destructive"
       size="lg"
-      className="w-full h-20 md:h-24 text-xl md:text-2xl font-bold border-4 border-red-500 animate-pulse shadow-lg"
+      className="w-full h-20 md:h-24 text-xl md:text-2xl font-bold border-4 border-red-500 shadow-lg"
       disabled={disabled}
     >
       <AlertCircle className="h-6 w-6 md:h-8 md:w-8 mr-2" />

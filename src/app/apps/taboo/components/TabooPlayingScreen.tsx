@@ -21,18 +21,12 @@ const WordDisplay = ({
   word,
   tabooWords,
   revealed,
-  hidden,
-  onReveal,
-  onHide,
-  onShow
+  onReveal
 }: {
   word: string;
   tabooWords: string[];
   revealed: boolean;
-  hidden: boolean;
   onReveal: () => void;
-  onHide: () => void;
-  onShow: () => void;
 }) => {
     if (!revealed) {
         return (
@@ -41,21 +35,11 @@ const WordDisplay = ({
                     <Eye className="h-16 w-16 text-primary" />
                     <h2 className="text-3xl font-bold">Are you the describer?</h2>
                     <p className="text-muted-foreground max-w-xs text-center">
-                        The word is hidden. Click the button below to reveal it. Make sure others can't see the screen!
+                        Click the button below to reveal the word.
                     </p>
                 </div>
                 <Button onClick={onReveal} size="lg" className="w-full text-lg h-14">
                     <Eye className="mr-2 h-6 w-6" /> Reveal Word
-                </Button>
-            </div>
-        )
-    }
-
-    if (hidden) {
-        return (
-             <div className="text-center w-full flex items-center justify-center animate-in fade-in duration-300">
-                <Button onClick={onShow} size="lg" className="w-full text-lg h-14">
-                    <Eye className="mr-2 h-6 w-6" /> Show Word
                 </Button>
             </div>
         )
@@ -84,10 +68,6 @@ const WordDisplay = ({
                     ))}
                 </div>
             </div>
-
-            <Button onClick={onHide} variant="ghost" size="sm" className="mt-4 text-muted-foreground">
-                <EyeOff className="mr-2 h-4 w-4" /> Hide Word
-            </Button>
         </div>
     );
 };
@@ -102,7 +82,6 @@ export default function TabooPlayingScreen({ gameState, dispatch }: TabooPlaying
 
   const { settings, currentTurn, currentRound, status } = gameState;
   const [timeLeft, setTimeLeft] = useState(settings.roundTime);
-  const [wordHidden, setWordHidden] = useState(false);
 
   const currentTeam = useMemo(() => gameState.teams[currentTurn.teamIndex], [gameState.teams, currentTurn.teamIndex]);
 
@@ -152,17 +131,14 @@ export default function TabooPlayingScreen({ gameState, dispatch }: TabooPlaying
   const handleSkipWord = () => {
     haptic.tap();
     dispatch({ type: 'SKIP_WORD' });
-    setWordHidden(false);
   };
 
   const handleViolation = () => {
     dispatch({ type: 'TABOO_VIOLATION' });
-    setWordHidden(false);
   };
 
   const handleRevealWord = () => {
     dispatch({type: 'REVEAL_WORD'});
-    setWordHidden(false);
   }
 
   const progressAngle = (timeLeft / settings.roundTime) * 360;
@@ -187,10 +163,7 @@ export default function TabooPlayingScreen({ gameState, dispatch }: TabooPlaying
               word={currentRound.word}
               tabooWords={currentRound.tabooWords}
               revealed={currentRound.wordRevealed}
-              hidden={wordHidden}
               onReveal={handleRevealWord}
-              onHide={() => setWordHidden(true)}
-              onShow={() => setWordHidden(false)}
             />
         </CardContent>
       </Card>

@@ -28,7 +28,7 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
   const [teams, setTeams] = useState<string[]>(['Team 1', 'Team 2']);
   const [roundTime, setRoundTime] = useState<number>(60);
   const [isCustomTime, setIsCustomTime] = useState(false);
-  const [skipLimit, setSkipLimit] = useState<number>(3);
+  const [skipLimit, setSkipLimit] = useState<number>(2);
   const [totalRounds, setTotalRounds] = useState<number>(5);
   const [continueUntilClearWinner, setContinueUntilClearWinner] = useState<boolean>(false);
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>({
@@ -209,10 +209,9 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
                   <SelectValue placeholder="Select skip limit" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="0">No skip</SelectItem>
                   <SelectItem value="1">1 skip</SelectItem>
                   <SelectItem value="2">2 skips</SelectItem>
-                  <SelectItem value="3">3 skips</SelectItem>
-                  <SelectItem value="5">5 skips</SelectItem>
                 </SelectContent>
               </Select>
             </div>
