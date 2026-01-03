@@ -4,21 +4,28 @@ import { useReducer, useEffect, useCallback } from 'react';
 import { getNewTabooWord, type SelectedCategories } from '@/lib/tabooWords';
 import type { Team } from '@/hooks/useGameEngine';
 
-export type Player = Team;
+export type Team = {
+  id: number;
+  name: string;
+  score: number;
+  roundsWon: number;
+};
 
 export interface TabooGameSettings {
   roundTime: number;
   skipLimit: number;
-  winningScore: number;
+  totalRounds: number;
+  continueUntilClearWinner: boolean;
   categories: SelectedCategories;
 }
 
 export interface TabooGameState {
   status: 'setup' | 'turn_start' | 'playing' | 'round_end' | 'game_over';
-  players: Player[];
+  teams: Team[];
   settings: TabooGameSettings;
   currentTurn: {
-    describerIndex: number;
+    teamIndex: number;
+    roundNumber: number;
   };
   currentRound: {
     word: string;
@@ -28,8 +35,9 @@ export interface TabooGameState {
     skipsUsed: number;
     wordRevealed: boolean;
     violations: number;
+    wordsGuessed: number;
   };
-  roundWinner: Player | null;
+  roundWinner: Team | null;
   usedWords: string[];
 }
 
@@ -49,15 +57,17 @@ type GameAction =
 
 const initialState: TabooGameState = {
   status: 'setup',
-  players: [],
+  teams: [],
   settings: {
     roundTime: 60,
     skipLimit: 3,
-    winningScore: 20,
+    totalRounds: 5,
+    continueUntilClearWinner: false,
     categories: {},
   },
   currentTurn: {
-    describerIndex: 0,
+    teamIndex: 0,
+    roundNumber: 1,
   },
   currentRound: {
     word: '',
@@ -67,6 +77,7 @@ const initialState: TabooGameState = {
     skipsUsed: 0,
     wordRevealed: false,
     violations: 0,
+    wordsGuessed: 0,
   },
   roundWinner: null,
   usedWords: [],
@@ -88,7 +99,7 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
       return {
         ...initialState,
         status: 'turn_start',
-        players: players.map((name, i) => ({ id: i, name, score: 0 })),
+        teams: players.map((name, i) => ({ id: i, name, score: 0, roundsWon: 0 })),
         settings,
         currentRound: {
             ...initialState.currentRound,
@@ -122,54 +133,35 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
         }
 
     case 'CORRECT_GUESS': {
-      const newPlayers = [...state.players];
-      const describer = newPlayers[state.currentTurn.describerIndex];
-      describer.score += 1;
-
-      const winner = newPlayers.find(p => p.score >= state.settings.winningScore);
+      const newTeams = [...state.teams];
+      const currentTeam = newTeams[state.currentTurn.teamIndex];
+      currentTeam.score += 1;
 
       return {
         ...state,
-        players: newPlayers,
-        status: winner ? 'game_over' : 'round_end',
-        roundWinner: describer,
+        teams: newTeams,
+        currentRound: {
+          ...state.currentRound,
+          wordsGuessed: state.currentRound.wordsGuessed + 1,
+        },
       };
     }
 
     case 'TABOO_VIOLATION': {
-      // Check if we've exceeded skip limit
-      if (state.currentRound.skipsUsed >= state.settings.skipLimit) {
-        // No more skips available, end round with no points
-        return {
-          ...state,
-          status: 'round_end',
-          roundWinner: null,
-          currentRound: {
-            ...state.currentRound,
-            violations: state.currentRound.violations + 1,
-          }
-        };
-      }
-
-      // Get new word (violation counts as a skip)
-      const newWordData = getNewTabooWord(state.usedWords, state.settings.categories);
-
-      if (!newWordData) {
-        return { ...state, status: 'game_over' };
-      }
+      // Violation deducts 1 point and ENDS the turn immediately
+      const newTeams = [...state.teams];
+      const currentTeam = newTeams[state.currentTurn.teamIndex];
+      currentTeam.score = Math.max(0, currentTeam.score - 1); // Can't go below 0
 
       return {
         ...state,
+        teams: newTeams,
+        status: 'round_end',
+        roundWinner: null,
         currentRound: {
-          word: newWordData.word,
-          tabooWords: newWordData.tabooWords,
-          category: newWordData.category,
-          subCategory: newWordData.subCategory,
-          skipsUsed: state.currentRound.skipsUsed + 1,
-          wordRevealed: true,
+          ...state.currentRound,
           violations: state.currentRound.violations + 1,
         },
-        usedWords: [...state.usedWords, newWordData.word],
       };
     }
 
@@ -179,7 +171,7 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
       const newWordData = getNewTabooWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
-        return { ...state, status: 'game_over' };
+        return { ...state, status: 'round_end' };
       }
 
       return {
@@ -192,6 +184,7 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
           skipsUsed: state.currentRound.skipsUsed + 1,
           wordRevealed: true,
           violations: state.currentRound.violations,
+          wordsGuessed: state.currentRound.wordsGuessed,
         },
         usedWords: [...state.usedWords, newWordData.word],
       };
@@ -206,7 +199,7 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
     }
 
     case 'FORFEIT_ROUND': {
-      const nextDescriberIndex = (state.currentTurn.describerIndex + 1) % state.players.length;
+      const nextTeamIndex = (state.currentTurn.teamIndex + 1) % state.teams.length;
       const newWordData = getNewTabooWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
@@ -218,7 +211,8 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
         status: 'turn_start',
         roundWinner: null,
         currentTurn: {
-            describerIndex: nextDescriberIndex,
+            teamIndex: nextTeamIndex,
+            roundNumber: state.currentTurn.roundNumber,
         },
         currentRound: {
             word: newWordData.word,
@@ -228,25 +222,57 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
             skipsUsed: 0,
             wordRevealed: false,
             violations: 0,
+            wordsGuessed: 0,
         },
         usedWords: [...state.usedWords, newWordData.word],
       };
     }
 
     case 'ADVANCE_TURN': {
-      const nextDescriberIndex = (state.currentTurn.describerIndex + 1) % state.players.length;
+      const nextTeamIndex = (state.currentTurn.teamIndex + 1) % state.teams.length;
       const newWordData = getNewTabooWord(state.usedWords, state.settings.categories);
 
       if (!newWordData) {
         return { ...state, status: 'game_over' };
       }
 
+      // Determine the round winner (team with highest score for this round)
+      const currentTeam = state.teams[state.currentTurn.teamIndex];
+      const newTeams = [...state.teams];
+      if (state.currentRound.wordsGuessed > 0) {
+        const roundWinnerTeam = newTeams[state.currentTurn.teamIndex];
+        roundWinnerTeam.roundsWon += 1;
+      }
+
+      // Check if we've completed all rounds for all teams
+      const isRoundComplete = nextTeamIndex === 0;
+      const nextRoundNumber = isRoundComplete ? state.currentTurn.roundNumber + 1 : state.currentTurn.roundNumber;
+
+      // Check if game should end
+      let shouldEndGame = false;
+      if (nextRoundNumber > state.settings.totalRounds) {
+        if (state.settings.continueUntilClearWinner) {
+          // Check for a clear winner (someone with more rounds won than others)
+          const sortedTeams = [...newTeams].sort((a, b) => b.roundsWon - a.roundsWon);
+          const hasClearWinner = sortedTeams[0].roundsWon > sortedTeams[1].roundsWon;
+          shouldEndGame = hasClearWinner;
+        } else {
+          shouldEndGame = true;
+        }
+      }
+
+      if (shouldEndGame) {
+        return { ...state, status: 'game_over', teams: newTeams };
+      }
+
       return {
         ...state,
+        teams: newTeams,
         status: 'turn_start',
-        roundWinner: null,
+        roundWinner: state.currentRound.wordsGuessed > 0 ? currentTeam : null,
         currentTurn: {
-            describerIndex: nextDescriberIndex,
+            teamIndex: nextTeamIndex,
+            roundNumber: nextRoundNumber,
         },
         currentRound: {
             word: newWordData.word,
@@ -256,6 +282,7 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
             skipsUsed: 0,
             wordRevealed: false,
             violations: 0,
+            wordsGuessed: 0,
         },
         usedWords: [...state.usedWords, newWordData.word],
       };
@@ -286,7 +313,7 @@ export function useTabooGameEngine() {
       const savedState = localStorage.getItem(STORAGE_KEY);
       if (savedState) {
         const parsed = JSON.parse(savedState);
-        if (parsed.status && parsed.players) {
+        if (parsed.status && parsed.teams) {
             dispatch({ type: 'LOAD_STATE', state: parsed });
         }
       }

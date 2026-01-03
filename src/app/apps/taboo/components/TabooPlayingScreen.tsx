@@ -104,7 +104,7 @@ export default function TabooPlayingScreen({ gameState, dispatch }: TabooPlaying
   const [timeLeft, setTimeLeft] = useState(settings.roundTime);
   const [wordHidden, setWordHidden] = useState(false);
 
-  const currentDescriber = useMemo(() => gameState.players[currentTurn.describerIndex], [gameState.players, currentTurn.describerIndex]);
+  const currentTeam = useMemo(() => gameState.teams[currentTurn.teamIndex], [gameState.teams, currentTurn.teamIndex]);
 
   useEffect(() => {
     if (status !== 'playing' || !currentRound.wordRevealed) {
@@ -158,9 +158,9 @@ export default function TabooPlayingScreen({ gameState, dispatch }: TabooPlaying
   const handleViolation = () => {
     toast({
       title: "Taboo Violation!",
-      description: "A taboo word was said. Moving to next word...",
+      description: `${currentTeam.name} loses 1 point and their turn ends!`,
       variant: "destructive",
-      duration: 2000,
+      duration: 3000,
     });
     dispatch({ type: 'TABOO_VIOLATION' });
     setWordHidden(false);
@@ -176,8 +176,9 @@ export default function TabooPlayingScreen({ gameState, dispatch }: TabooPlaying
   return (
     <div className="flex flex-col h-full items-center justify-between space-y-4">
       <div className="w-full text-center">
-        <p className="text-lg text-primary">Describer: {currentDescriber.name}</p>
-        <p className="text-2xl font-bold">{currentDescriber.score} points</p>
+        <p className="text-lg text-muted-foreground">Round {gameState.currentTurn.roundNumber}</p>
+        <p className="text-2xl font-bold text-primary">{currentTeam.name}</p>
+        <p className="text-lg text-muted-foreground">Score: {currentTeam.score} | Words: {gameState.currentRound.wordsGuessed}</p>
       </div>
 
       <Card className="w-full flex-grow flex flex-col items-center justify-center p-6 bg-card shadow-xl border-4">

@@ -11,13 +11,15 @@ type TabooTurnStartScreenProps = {
 };
 
 export default function TabooTurnStartScreen({ gameState, dispatch }: TabooTurnStartScreenProps) {
-  const currentDescriber = gameState.players[gameState.currentTurn.describerIndex];
+  const currentTeam = gameState.teams[gameState.currentTurn.teamIndex];
 
   return (
     <div className="flex flex-col items-center justify-center space-y-6 min-h-[400px]">
       <div className="text-center space-y-4">
-        <h2 className="text-2xl font-semibold text-muted-foreground">Next Describer</h2>
-        <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold">{currentDescriber.name}</h1>
+        <h2 className="text-2xl font-semibold text-muted-foreground">Round {gameState.currentTurn.roundNumber}</h2>
+        <h3 className="text-xl text-muted-foreground">Next Team</h3>
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold">{currentTeam.name}</h1>
+        <p className="text-lg text-muted-foreground">Score: {currentTeam.score} | Rounds Won: {currentTeam.roundsWon}</p>
       </div>
 
       <Card className="w-full max-w-md border-2">

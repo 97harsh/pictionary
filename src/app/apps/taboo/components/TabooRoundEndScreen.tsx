@@ -16,8 +16,9 @@ type TabooRoundEndScreenProps = {
 
 export default function TabooRoundEndScreen({ gameState, dispatch }: TabooRoundEndScreenProps) {
     const { roundWinner, currentRound } = gameState;
-    const nextDescriberIndex = (gameState.currentTurn.describerIndex + 1) % gameState.players.length;
-    const nextDescriber = gameState.players[nextDescriberIndex];
+    const nextTeamIndex = (gameState.currentTurn.teamIndex + 1) % gameState.teams.length;
+    const nextTeam = gameState.teams[nextTeamIndex];
+    const currentTeam = gameState.teams[gameState.currentTurn.teamIndex];
 
     const handleNextTurn = () => {
         dispatch({ type: 'ADVANCE_TURN' });
@@ -28,16 +29,20 @@ export default function TabooRoundEndScreen({ gameState, dispatch }: TabooRoundE
             {roundWinner && <Confetti />}
 
             <div className="space-y-2">
-                <h2 className="text-4xl font-bold">
-                    {roundWinner ? `${roundWinner.name} Got It!` : "Time's Up!"}
-                </h2>
-                {roundWinner ? (
+                <h2 className="text-lg text-muted-foreground">Round {gameState.currentTurn.roundNumber}</h2>
+                <h3 className="text-4xl font-bold">{currentTeam.name}'s Turn</h3>
+                {currentRound.violations > 0 ? (
+                    <div className="space-y-1">
+                        <p className="text-2xl text-destructive font-bold">Taboo Violation!</p>
+                        <p className="text-lg text-muted-foreground">Lost 1 point</p>
+                    </div>
+                ) : currentRound.wordsGuessed > 0 ? (
                     <p className="text-xl text-green-400">
-                        {roundWinner.name} scores +1 point!
+                        Scored {currentRound.wordsGuessed} word{currentRound.wordsGuessed > 1 ? 's' : ''}!
                     </p>
                 ) : (
-                    <p className="text-xl text-destructive">
-                        No points awarded this round.
+                    <p className="text-xl text-muted-foreground">
+                        Time's up!
                     </p>
                 )}
             </div>
@@ -78,11 +83,11 @@ export default function TabooRoundEndScreen({ gameState, dispatch }: TabooRoundE
             )}
 
             <div className="pt-4">
-                 <Scoreboard teams={gameState.players} />
+                 <Scoreboard teams={gameState.teams} />
             </div>
 
             <Button onClick={handleNextTurn} size="lg" className="w-full text-lg h-14">
-                Next Turn: {nextDescriber.name} describes <ArrowRight className="ml-2 h-5 w-5" />
+                Next Turn: {nextTeam.name} <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
 
             <div className="!mt-8">

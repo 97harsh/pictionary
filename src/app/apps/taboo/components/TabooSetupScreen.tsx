@@ -25,45 +25,46 @@ type TabooSetupScreenProps = {
 };
 
 export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
-  const [players, setPlayers] = useState<string[]>(['Player 1', 'Player 2', 'Player 3']);
+  const [teams, setTeams] = useState<string[]>(['Team 1', 'Team 2']);
   const [roundTime, setRoundTime] = useState<number>(60);
   const [isCustomTime, setIsCustomTime] = useState(false);
   const [skipLimit, setSkipLimit] = useState<number>(3);
-  const [winningScore, setWinningScore] = useState<number>(20);
+  const [totalRounds, setTotalRounds] = useState<number>(5);
+  const [continueUntilClearWinner, setContinueUntilClearWinner] = useState<boolean>(false);
   const [selectedCategories, setSelectedCategories] = useState<SelectedCategories>({
     'General': { difficulty: 'Beginner', subcategories: ['Objects', 'Actions'] },
   });
   const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleAddPlayer = () => {
-    if (players.length < 8) {
-      setPlayers([...players, `Player ${players.length + 1}`]);
+  const handleAddTeam = () => {
+    if (teams.length < 6) {
+      setTeams([...teams, `Team ${teams.length + 1}`]);
     } else {
       toast({
-        title: "Player Limit Reached",
-        description: "You can have a maximum of 8 players.",
+        title: "Team Limit Reached",
+        description: "You can have a maximum of 6 teams.",
         variant: "destructive",
       })
     }
   };
 
-  const handleRemovePlayer = (index: number) => {
-    if (players.length > 3) {
-      setPlayers(players.filter((_, i) => i !== index));
+  const handleRemoveTeam = (index: number) => {
+    if (teams.length > 2) {
+      setTeams(teams.filter((_, i) => i !== index));
     } else {
       toast({
-        title: "Minimum Players Required",
-        description: "You need at least 3 players to play Taboo.",
+        title: "Minimum Teams Required",
+        description: "You need at least 2 teams to play Taboo.",
         variant: "destructive",
       })
     }
   };
 
-  const handlePlayerNameChange = (index: number, newName: string) => {
-    const newPlayers = [...players];
-    newPlayers[index] = newName;
-    setPlayers(newPlayers);
+  const handleTeamNameChange = (index: number, newName: string) => {
+    const newTeams = [...teams];
+    newTeams[index] = newName;
+    setTeams(newTeams);
   };
 
   const handleStartGame = () => {
@@ -77,11 +78,11 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
         return;
     }
 
-    const filledPlayers = players.filter(p => p.trim());
-    if (filledPlayers.length < 3) {
+    const filledTeams = teams.filter(t => t.trim());
+    if (filledTeams.length < 2) {
       toast({
-        title: "Not Enough Players",
-        description: "You need at least 3 players to start the game.",
+        title: "Not Enough Teams",
+        description: "You need at least 2 teams to start the game.",
         variant: "destructive",
       })
       return;
@@ -89,11 +90,12 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
 
     dispatch({
       type: 'START_GAME',
-      players: filledPlayers,
+      players: filledTeams,
       settings: {
         roundTime,
         skipLimit,
-        winningScore,
+        totalRounds,
+        continueUntilClearWinner,
         categories: selectedCategories,
       },
     });
@@ -114,29 +116,29 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Player Management */}
+        {/* Team Management */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" /> Players
+              <Users className="h-5 w-5" /> Teams
             </CardTitle>
-            <CardDescription>Add 3-8 players</CardDescription>
+            <CardDescription>Add 2-6 teams</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-              {players.map((player, index) => (
+              {teams.map((team, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <Input
-                    placeholder={`Player ${index + 1}`}
-                    value={player}
-                    onChange={(e) => handlePlayerNameChange(index, e.target.value)}
+                    placeholder={`Team ${index + 1}`}
+                    value={team}
+                    onChange={(e) => handleTeamNameChange(index, e.target.value)}
                     className="flex-grow"
                   />
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleRemovePlayer(index)}
-                    disabled={players.length <= 3}
+                    onClick={() => handleRemoveTeam(index)}
+                    disabled={teams.length <= 2}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -144,12 +146,12 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
               ))}
             </div>
             <Button
-              onClick={handleAddPlayer}
+              onClick={handleAddTeam}
               variant="outline"
               className="w-full"
-              disabled={players.length >= 8}
+              disabled={teams.length >= 6}
             >
-              <Plus className="h-4 w-4 mr-2" /> Add Player
+              <Plus className="h-4 w-4 mr-2" /> Add Team
             </Button>
           </CardContent>
         </Card>
@@ -216,17 +218,31 @@ export default function TabooSetupScreen({ dispatch }: TabooSetupScreenProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Winning Score</Label>
-              <Select value={String(winningScore)} onValueChange={(value) => setWinningScore(Number(value))}>
+              <Label>Total Rounds</Label>
+              <Select value={String(totalRounds)} onValueChange={(value) => setTotalRounds(Number(value))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select winning score" />
+                  <SelectValue placeholder="Select total rounds" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="15">15 points</SelectItem>
-                  <SelectItem value="20">20 points</SelectItem>
-                  <SelectItem value="30">30 points</SelectItem>
+                  <SelectItem value="3">3 rounds</SelectItem>
+                  <SelectItem value="5">5 rounds</SelectItem>
+                  <SelectItem value="7">7 rounds</SelectItem>
+                  <SelectItem value="10">10 rounds</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="continueUntilClearWinner"
+                checked={continueUntilClearWinner}
+                onChange={(e) => setContinueUntilClearWinner(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <Label htmlFor="continueUntilClearWinner" className="text-sm cursor-pointer">
+                Continue until clear winner
+              </Label>
             </div>
           </CardContent>
         </Card>
