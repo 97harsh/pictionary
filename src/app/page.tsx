@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { APPS, App } from '@/lib/apps';
 import { ArrowRight } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function AppHub() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +21,10 @@ export default function AppHub() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-4xl mx-auto">
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 relative">
+          <div className="absolute top-0 right-0">
+            <ThemeToggle />
+          </div>
           <h1 className="text-5xl font-bold tracking-tighter text-primary">App Hub</h1>
           <p className="text-muted-foreground mt-2">Discover and launch a variety of games and tools.</p>
         </header>
