@@ -137,9 +137,12 @@ function gameReducer(state: TabooGameState, action: GameAction): TabooGameState 
       const currentTeam = newTeams[state.currentTurn.teamIndex];
       currentTeam.score += 1;
 
+      // End the turn after a correct guess
       return {
         ...state,
         teams: newTeams,
+        status: 'round_end',
+        roundWinner: currentTeam,
         currentRound: {
           ...state.currentRound,
           wordsGuessed: state.currentRound.wordsGuessed + 1,
