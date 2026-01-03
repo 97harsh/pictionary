@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { WORDS, type SelectedCategories, type Difficulty } from '@/lib/words';
+import { type SelectedCategories, type Difficulty, type WordStructure } from '@/lib/words';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
@@ -14,13 +14,14 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 type CategorySelectionScreenProps = {
+  wordsStructure: WordStructure | any; // Accept any word structure (WordStructure or TabooWordStructure)
   initialSelection: SelectedCategories;
   onSave: (selection: SelectedCategories) => void;
 };
 
-export default function CategorySelectionScreen({ initialSelection, onSave }: CategorySelectionScreenProps) {
+export default function CategorySelectionScreen({ wordsStructure, initialSelection, onSave }: CategorySelectionScreenProps) {
   const [selection, setSelection] = useState<SelectedCategories>(initialSelection);
-  const mainCategories = useMemo(() => Object.keys(WORDS), []);
+  const mainCategories = useMemo(() => Object.keys(wordsStructure), [wordsStructure]);
   const { toast } = useToast();
 
   const handleDifficultyChange = (mainCategory: string, difficulty: Difficulty) => {
@@ -87,7 +88,7 @@ export default function CategorySelectionScreen({ initialSelection, onSave }: Ca
     <div className="space-y-6 h-full flex flex-col">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {mainCategories.map(mainCategory => {
-            const subcategories = Object.keys(WORDS[mainCategory]);
+            const subcategories = Object.keys(wordsStructure[mainCategory]);
             const currentSelection = selection[mainCategory];
             const currentDifficulty = currentSelection?.difficulty || 'Beginner';
             const selectedSubcategories = currentSelection?.subcategories || [];
