@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,18 @@ import Link from 'next/link';
 import { APPS, App } from '@/lib/apps';
 import { ArrowRight } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useTheme } from '@/providers/theme-provider';
 import { cn } from '@/lib/utils';
 
 export default function AppHub() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCard, setActiveCard] = useState<string | null>(null);
+  const { onThemeChange } = useTheme();
+
+  // Reset highlight when theme changes
+  useEffect(() => {
+    return onThemeChange(() => setActiveCard(null));
+  }, [onThemeChange]);
 
   const filteredApps = APPS.filter((app) =>
     app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

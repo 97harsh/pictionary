@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -9,10 +9,13 @@ type ThemeProviderProps = {
   children: React.ReactNode;
 };
 
+type ThemeChangeListener = () => void;
+
 type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   resolvedTheme: 'light' | 'dark';
+  onThemeChange: (listener: ThemeChangeListener) => () => void;
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(
@@ -22,6 +25,7 @@ const ThemeProviderContext = createContext<ThemeProviderState | undefined>(
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>('system');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const listenersRef = React.useRef<Set<ThemeChangeListener>>(new Set());
 
   // Initialize theme from localStorage
   useEffect(() => {
@@ -84,12 +88,22 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       // localStorage not available
     }
     setThemeState(newTheme);
+    // Notify listeners
+    listenersRef.current.forEach(listener => listener());
   };
+
+  const onThemeChange = useCallback((listener: ThemeChangeListener) => {
+    listenersRef.current.add(listener);
+    return () => {
+      listenersRef.current.delete(listener);
+    };
+  }, []);
 
   const value = {
     theme,
     setTheme,
     resolvedTheme,
+    onThemeChange,
   };
 
   return (
