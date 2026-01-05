@@ -83,4 +83,14 @@
       inset 0 0 30px 10px hsl(var(--primary) / 0.3);
     background-color: hsl(var(--primary) / 0.15);
   }
+
+  /* Only apply hover on devices with hover capability (desktop) */
+  @media (hover: hover) {
+    .tap-highlight:hover {
+      box-shadow:
+        0 0 30px 8px hsl(var(--primary) / 0.4),
+        inset 0 0 30px 10px hsl(var(--primary) / 0.3);
+      background-color: hsl(var(--primary) / 0.15);
+    }
+  }
 }

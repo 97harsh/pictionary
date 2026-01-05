@@ -50,6 +50,7 @@ export default function AppHub() {
                 activeCard === app.id && "active"
               )}
               onClick={() => setActiveCard(activeCard === app.id ? null : app.id)}
+              onMouseEnter={() => setActiveCard(null)}
             >
               <CardHeader>
                 <div className="flex items-center gap-4">
