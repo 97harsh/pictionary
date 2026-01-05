@@ -129,7 +129,7 @@ export default function CategorySelectionScreen({ wordsStructure, initialSelecti
                                   key={sub}
                                   onClick={() => handleSubcategoryChange(mainCategory, sub)}
                                   className={cn(
-                                      "flex items-center space-x-2 p-2 rounded-md cursor-pointer transition-colors",
+                                      "flex items-center space-x-2 p-2 rounded-md cursor-pointer tap-highlight",
                                       selectedSubcategories.includes(sub) ? "bg-accent/20" : "hover:bg-muted"
                                   )}
                               >
