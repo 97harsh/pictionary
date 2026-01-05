@@ -9,6 +9,8 @@ import { Check, SkipForward, Eye, EyeOff } from 'lucide-react';
 import CategoryIcon from '../icons/CategoryIcon';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useTapHighlight } from '@/hooks/useTapHighlight';
+import { cn } from '@/lib/utils';
 import ForfeitButton from './ForfeitButton';
 
 type PlayingScreenProps = {
@@ -62,6 +64,8 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
   const { play: playEnd } = useSound('/sounds/timesup.wav', { volume: 0 });
   const { play: playCorrect } = useSound('/sounds/correct.wav', { volume: -5 });
   const haptic = useHaptic();
+  const correctTap = useTapHighlight();
+  const skipTap = useTapHighlight();
 
   const { settings, currentTurn, currentRound, status } = gameState;
   const [timeLeft, setTimeLeft] = useState(settings.roundTime);
@@ -179,12 +183,18 @@ export default function PlayingScreen({ gameState, dispatch }: PlayingScreenProp
             onClick={handleSkipWord}
             variant="outline"
             size="lg"
-            className="h-24 md:h-28 text-2xl md:text-3xl font-bold border-4"
+            className={cn("h-24 md:h-28 text-2xl md:text-3xl font-bold border-4 tap-highlight", skipTap.isPressed && "pressed")}
             disabled={currentRound.skipsUsed >= settings.skipLimit}
+            {...skipTap.handlers}
           >
             <SkipForward className="mr-3 h-10 w-10" /> SKIP ({settings.skipLimit - currentRound.skipsUsed})
           </Button>
-          <Button onClick={handleCorrectGuess} size="lg" className="h-24 md:h-28 text-2xl md:text-3xl font-bold bg-accent hover:bg-accent/90">
+          <Button
+            onClick={handleCorrectGuess}
+            size="lg"
+            className={cn("h-24 md:h-28 text-2xl md:text-3xl font-bold bg-accent hover:bg-accent/90 tap-highlight", correctTap.isPressed && "pressed")}
+            {...correctTap.handlers}
+          >
             <Check className="mr-3 h-12 w-12" /> GOT IT!
           </Button>
         </div>

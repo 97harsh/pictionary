@@ -44,7 +44,7 @@ export default function GuesserSelectionScreen({ gameState, dispatch }: GuesserS
                                 key={player.id}
                                 onClick={() => handleGuesserSelected(player.id)}
                                 size="lg"
-                                className="h-20 text-xl font-bold bg-accent hover:bg-accent/90"
+                                className="h-20 text-xl font-bold bg-accent hover:bg-accent/90 tap-highlight"
                             >
                                 <UserCheck className="mr-2 h-6 w-6" />
                                 {player.name}
@@ -57,7 +57,7 @@ export default function GuesserSelectionScreen({ gameState, dispatch }: GuesserS
                             onClick={handleNoOneGuessed}
                             variant="outline"
                             size="lg"
-                            className="w-full h-16 text-lg border-2"
+                            className="w-full h-16 text-lg border-2 tap-highlight"
                         >
                             <X className="mr-2 h-5 w-5" />
                             No One Guessed

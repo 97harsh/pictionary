@@ -9,9 +9,11 @@ import Link from 'next/link';
 import { APPS, App } from '@/lib/apps';
 import { ArrowRight } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { cn } from '@/lib/utils';
 
 export default function AppHub() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeCard, setActiveCard] = useState<string | null>(null);
 
   const filteredApps = APPS.filter((app) =>
     app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,7 +43,14 @@ export default function AppHub() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredApps.map((app) => (
-            <Card key={app.id} className="flex flex-col group hover:border-primary transition-all">
+            <Card
+              key={app.id}
+              className={cn(
+                "flex flex-col group hover:border-primary transition-all tap-highlight cursor-pointer",
+                activeCard === app.id && "active"
+              )}
+              onClick={() => setActiveCard(activeCard === app.id ? null : app.id)}
+            >
               <CardHeader>
                 <div className="flex items-center gap-4">
                     {app.icon && <app.icon className="h-8 w-8 text-primary" />}
@@ -50,7 +59,7 @@ export default function AppHub() {
                 <CardDescription>{app.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow flex items-end">
-                <Link href={app.href} className="w-full">
+                <Link href={app.href} className="w-full" onClick={(e) => e.stopPropagation()}>
                   <Button className="w-full bg-accent hover:bg-accent/90">
                     Launch App <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
