@@ -9,8 +9,13 @@ updates:
     # Add repo owner as reviewer
     reviewers:
       - "97harsh"
+    # Ignore major version updates to prevent breaking changes
+    # Major updates often have peer dependency conflicts (e.g., zod v3->v4 breaks genkit)
+    # Security alerts still work independently for critical vulnerabilities
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     # Group updates to reduce PR count
-    # Note: Major updates are NOT grouped to avoid peer dependency conflicts
     groups:
       # Group all production dependencies together (minor and patch only)
       production-dependencies:
